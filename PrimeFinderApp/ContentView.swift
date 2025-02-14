@@ -15,24 +15,23 @@ struct HistoryItem: Identifiable, Equatable {
 }
 
 struct ContentView: View {
-    @State private var inputNumber: String = ""
-    @State private var result: String = ""
-    @State private var isLoading = false
-    @State private var history: [HistoryItem] = []
-    @State private var showingHistory = false
-    @State private var showingResetAlert = false
-    @FocusState private var isInputFocused: Bool
+    @State internal var inputNumber: String = ""
+    @State internal var result: String = ""
+    @State internal var history: [HistoryItem] = []
+    @State internal var showingHistory = false
+    @State internal var showingResetAlert = false
+    @FocusState internal var isInputFocused: Bool
     
     // MARK: - Constants
-    private let maxInputLength = 9 // Prevent integer overflow
+    let maxInputLength = 9 // Prevent integer overflow
     
     // MARK: - Colors
-    private let primaryColor = Color.blue
-    private let backgroundColor = Color(.systemBackground)
-    private let secondaryBackgroundColor = Color(.systemGray6)
+    let primaryColor = Color.blue
+    let backgroundColor = Color(.systemBackground)
+    let secondaryBackgroundColor = Color(.systemGray6)
     
     // MARK: - Keyboard Dismissal
-    private func dismissKeyboard() {
+    func dismissKeyboard() {
         isInputFocused = false
         UIImpactFeedbackGenerator(style: .light).impactOccurred()
     }
@@ -81,7 +80,7 @@ struct ContentView: View {
         return factors
     }
     
-    private func addToHistory(number: Int, result: String) {
+    func addToHistory(number: Int, result: String) {
         let historyItem = HistoryItem(number: number, result: result, timestamp: Date())
         history.insert(historyItem, at: 0) // Add to beginning of array
     }
@@ -100,32 +99,13 @@ struct ContentView: View {
         // Provide success haptic feedback
         UINotificationFeedbackGenerator().notificationOccurred(.success)
         
-        if number > 10000 {
-            isLoading = true
-            
-            DispatchQueue.global(qos: .userInitiated).async {
-                let isPrimeResult = isPrime(number)
-                
-                DispatchQueue.main.async {
-                    if isPrimeResult {
-                        result = "\(number) is a prime number"
-                    } else {
-                        let factors = primeFactors(number)
-                        result = "\(number) is not a prime number\nPrime factors: \(factors.map { String($0) }.joined(separator: " × "))"
-                    }
-                    addToHistory(number: number, result: result)
-                    isLoading = false
-                }
-            }
+        if isPrime(number) {
+            result = "\(number) is a prime number"
         } else {
-            if isPrime(number) {
-                result = "\(number) is a prime number"
-            } else {
-                let factors = primeFactors(number)
-                result = "\(number) is not a prime number\nPrime factors: \(factors.map { String($0) }.joined(separator: " × "))"
-            }
-            addToHistory(number: number, result: result)
+            let factors = primeFactors(number)
+            result = "\(number) is not a prime number\nPrime factors: \(factors.map { String($0) }.joined(separator: " × "))"
         }
+        addToHistory(number: number, result: result)
     }
     
     // MARK: - View Components
@@ -200,29 +180,19 @@ struct ContentView: View {
             .shadow(radius: 2)
         }
         .padding(.horizontal)
-        .disabled(isLoading || inputNumber.isEmpty)
+        .disabled(inputNumber.isEmpty)
         .accessibilityLabel("Check Number Button")
     }
     
     var resultView: some View {
-        VStack {
-            if isLoading {
-                ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: primaryColor))
-                    .scaleEffect(1.2)
-                    .padding()
-            }
-            
-            Text(result)
-                .font(.body)
-                .padding()
-                .multilineTextAlignment(.center)
-                .accessibilityLabel("Result Text View")
-                .foregroundColor(result.contains("is a prime number") ? .green : 
-                               result.contains("is not a prime number") ? primaryColor : .red)
-                .animation(.easeInOut, value: result)
-        }
-        .padding(.vertical)
+        Text(result)
+            .font(.body)
+            .padding()
+            .multilineTextAlignment(.center)
+            .accessibilityLabel("Result Text View")
+            .foregroundColor(result.contains("is a prime number") ? .green : 
+                           result.contains("is not a prime number") ? primaryColor : .red)
+            .animation(.easeInOut, value: result)
     }
     
     var historyButton: some View {
