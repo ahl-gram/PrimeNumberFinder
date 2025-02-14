@@ -89,7 +89,7 @@ struct ContentView: View {
         dismissKeyboard()
         
         guard isValidInput(inputNumber) else {
-            result = "Please enter a valid positive integer"
+            result = "Please enter a valid positive integer."
             UINotificationFeedbackGenerator().notificationOccurred(.error)
             return
         }
@@ -99,11 +99,16 @@ struct ContentView: View {
         // Provide success haptic feedback
         UINotificationFeedbackGenerator().notificationOccurred(.success)
         
-        if isPrime(number) {
-            result = "\(number) is a prime number"
-        } else {
-            let factors = primeFactors(number)
-            result = "\(number) is not a prime number\nPrime factors: \(factors.map { String($0) }.joined(separator: " × "))"
+        if number == 1 {
+            result = "\(number) is defined as not a prime."
+        }
+        else {
+            if isPrime(number) {
+                result = "\(number) is a prime number."
+            } else {
+                let factors = primeFactors(number)
+                result = "\(number) is not a prime number.\nPrime factors: \(factors.map { String($0) }.joined(separator: " × "))"
+            }
         }
         addToHistory(number: number, result: result)
     }
@@ -150,11 +155,15 @@ struct ContentView: View {
                             Spacer()
                             Button(action: {
                                 inputNumber = ""
+                                result = ""
                                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
                             }) {
                                 Image(systemName: "xmark.circle.fill")
                                     .foregroundColor(.gray)
                                     .padding(.trailing, 8)
+                                    .imageScale(.medium)
+                                    .padding(.trailing, 24)
+                                    .padding(.vertical, 12)
                             }
                         }
                     }

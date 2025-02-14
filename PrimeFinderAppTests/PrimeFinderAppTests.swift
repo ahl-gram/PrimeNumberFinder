@@ -104,7 +104,7 @@ final class PrimeFinderAppTests: XCTestCase {
     
     func testHistoryItemCreation() {
         let number = 17
-        let result = "17 is a prime number"
+        let result = "17 is a prime number."
         let timestamp = Date()
         
         let historyItem = HistoryItem(number: number, result: result, timestamp: timestamp)
@@ -116,9 +116,9 @@ final class PrimeFinderAppTests: XCTestCase {
     
     func testHistoryItemEquality() {
         let timestamp = Date()
-        let item1 = HistoryItem(number: 17, result: "17 is a prime number", timestamp: timestamp)
-        let item2 = HistoryItem(number: 17, result: "17 is a prime number", timestamp: timestamp)
-        let item3 = HistoryItem(number: 18, result: "18 is not a prime number", timestamp: timestamp)
+        let item1 = HistoryItem(number: 17, result: "17 is a prime number.", timestamp: timestamp)
+        let item2 = HistoryItem(number: 17, result: "17 is a prime number.", timestamp: timestamp)
+        let item3 = HistoryItem(number: 18, result: "18 is not a prime number.", timestamp: timestamp)
         
         XCTAssertEqual(item1, item1)  // Same instance
         XCTAssertNotEqual(item1, item2)  // Different instances, even with same values (due to UUID)
@@ -126,18 +126,6 @@ final class PrimeFinderAppTests: XCTestCase {
     }
     
     // MARK: - UI Interaction Tests
-    
-    // Helper method to set @State value
-    private func setInputNumber(_ value: String) {
-        contentView.inputNumber = value
-        // Simulate the onChange behavior that happens in the UI
-        let filtered = value.filter { "0123456789".contains($0) }
-        if filtered.count > contentView.maxInputLength {
-            contentView.inputNumber = String(filtered.prefix(contentView.maxInputLength))
-        } else {
-            contentView.inputNumber = filtered
-        }
-    }
     
     private func clearHistory() {
         contentView.history = []
