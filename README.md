@@ -23,7 +23,7 @@ A sleek iOS app that helps you identify prime numbers and find prime factorizati
 
 1. Clone the repository
 ```bash
-git clone https://github.com/yourusername/PrimeFinderApp.git
+git clone https://github.com/ahl-gram/PrimeFinderApp.git
 ```
 
 2. Open the project in Xcode
