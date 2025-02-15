@@ -245,8 +245,11 @@ struct ContentView: View {
             .padding()
             .multilineTextAlignment(.center)
             .accessibilityLabel("Result Text View")
-            .foregroundColor(result.contains("is a prime number") ? .green : 
-                           result.contains("is not a prime number") ? primaryColor : .red)
+            .foregroundColor(result.contains("is a prime")
+                             ? .green
+                             : result.contains("is not a prime") || result.contains("defined as not")
+                                ? primaryColor
+                                : .red)
             .animation(.easeInOut, value: result)
     }
     
