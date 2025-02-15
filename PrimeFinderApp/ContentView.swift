@@ -23,7 +23,7 @@ struct ContentView: View {
     @FocusState internal var isInputFocused: Bool
     
     // MARK: - Constants
-    let maxInputLength = 9 // Prevent integer overflow
+    let maxInputLength = 10 // Prevent integer overflow
     
     // MARK: - Colors
     let primaryColor = Color.blue
@@ -172,25 +172,71 @@ struct ContentView: View {
     }
     
     var checkButton: some View {
-        Button(action: {
-            validateAndProcessInput()
-        }) {
-            HStack {
-                Image(systemName: "checkmark.circle.fill")
+        HStack(spacing: 10) {
+            // Minus Button
+            Button(action: {
+                if let number = Int(inputNumber) {
+                    inputNumber = String(number - 1)
+                    if !result.isEmpty {
+                        validateAndProcessInput()
+                    }
+                }
+            }) {
+                Image(systemName: "minus.circle.fill")
                     .imageScale(.large)
-                Text("Check Number")
-                    .font(.headline)
+                    .foregroundColor(.white)
+                    .frame(width: 44, height: 44)
+                    .background(primaryColor)
+                    .cornerRadius(12)
+                    .shadow(radius: 2)
+                    .opacity(inputNumber.isEmpty || inputNumber <= "1" ? 0.5 : 1.0)
             }
-            .foregroundColor(.white)
-            .frame(maxWidth: .infinity)
-            .padding()
-            .background(primaryColor)
-            .cornerRadius(12)
-            .shadow(radius: 2)
+            .disabled(inputNumber.isEmpty || inputNumber <= "1")
+            .accessibilityLabel("Decrement Number")
+
+            // Original Check Button
+            Button(action: {
+                validateAndProcessInput()
+            }) {
+                HStack {
+                    Image(systemName: "checkmark.circle.fill")
+                        .imageScale(.large)
+                    Text("Check Number")
+                        .font(.headline)
+                }
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(primaryColor)
+                .cornerRadius(12)
+                .shadow(radius: 2)
+                .opacity(inputNumber.isEmpty ? 0.5 : 1.0)
+            }
+            .disabled(inputNumber.isEmpty)
+            .accessibilityLabel("Check Number Button")
+
+            // Plus Button
+            Button(action: {
+                if let number = Int(inputNumber) {
+                    inputNumber = String(number + 1)
+                    if !result.isEmpty {
+                        validateAndProcessInput()
+                    }
+                }
+            }) {
+                Image(systemName: "plus.circle.fill")
+                    .imageScale(.large)
+                    .foregroundColor(.white)
+                    .frame(width: 44, height: 44)
+                    .background(primaryColor)
+                    .cornerRadius(12)
+                    .shadow(radius: 2)
+                    .opacity(inputNumber.isEmpty || inputNumber >= "9999999999" ? 0.5 : 1.0)
+            }
+            .disabled(inputNumber.isEmpty || inputNumber >= "9999999999")
+            .accessibilityLabel("Increment Number")
         }
         .padding(.horizontal)
-        .disabled(inputNumber.isEmpty)
-        .accessibilityLabel("Check Number Button")
     }
     
     var resultView: some View {
