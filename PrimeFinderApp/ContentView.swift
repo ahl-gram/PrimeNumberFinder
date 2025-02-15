@@ -99,15 +99,18 @@ struct ContentView: View {
         // Provide success haptic feedback
         UINotificationFeedbackGenerator().notificationOccurred(.success)
         
+        // Format number with thousands separator
+        let formattedNumber = NumberFormatter.localizedString(from: NSNumber(value: number), number: .decimal)
+        
         if number == 1 {
-            result = "\(number) is defined as not a prime."
+            result = "\(formattedNumber) is defined as not a prime."
         }
         else {
             if isPrime(number) {
-                result = "\(number) is a prime number."
+                result = "\(formattedNumber) is a prime number."
             } else {
                 let factors = primeFactors(number)
-                result = "\(number) is not a prime number.\nPrime factors: \(factors.map { String($0) }.joined(separator: " × "))"
+                result = "\(formattedNumber) is not a prime number.\nPrime factors: \(factors.map { String($0) }.joined(separator: " × "))"
             }
         }
         addToHistory(number: number, result: result)
