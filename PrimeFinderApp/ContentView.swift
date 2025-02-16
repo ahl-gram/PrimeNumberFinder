@@ -58,6 +58,29 @@ struct ContentView: View {
         return true
     }
     
+    func findNextPrime(_ from: Int) -> Int? {
+        var current = from + 1
+        // Prevent integer overflow
+        while current <= Int.max && current <= 9999999999 {
+            if isPrime(current) {
+                return current
+            }
+            current += 1
+        }
+        return nil
+    }
+    
+    func findPreviousPrime(_ from: Int) -> Int? {
+        var current = from - 1
+        while current >= 2 {
+            if isPrime(current) {
+                return current
+            }
+            current -= 1
+        }
+        return nil
+    }
+    
     func primeFactors(_ number: Int) -> [Int] {
         var n = number
         var factors: [Int] = []
@@ -180,7 +203,14 @@ struct ContentView: View {
         HStack(spacing: 10) {
             // Left Arrow Button
             Button(action: {
-                // No action yet
+                if let number = Int(inputNumber),
+                   let previousPrime = findPreviousPrime(number) {
+                    inputNumber = String(previousPrime)
+                    UINotificationFeedbackGenerator().notificationOccurred(.success)
+                    validateAndProcessInput()
+                } else {
+                    UINotificationFeedbackGenerator().notificationOccurred(.error)
+                }
             }) {
                 Image(systemName: "arrowtriangle.left.circle.fill")
                     .imageScale(.large)
@@ -189,10 +219,10 @@ struct ContentView: View {
                     .background(primaryColor)
                     .cornerRadius(12)
                     .shadow(radius: 2)
-                    .opacity(inputNumber.isEmpty ? 0.5 : 1.0)
+                    .opacity(inputNumber.isEmpty || inputNumber <= "1" ? 0.5 : 1.0)
             }
-            .disabled(inputNumber.isEmpty)
-            .accessibilityLabel("Left Arrow")
+            .disabled(inputNumber.isEmpty || inputNumber <= "1")
+            .accessibilityLabel("Previous Prime")
 
             // Minus Button
             Button(action: {
@@ -259,7 +289,14 @@ struct ContentView: View {
 
             // Right Arrow Button
             Button(action: {
-                // No action yet
+                if let number = Int(inputNumber),
+                   let nextPrime = findNextPrime(number) {
+                    inputNumber = String(nextPrime)
+                    UINotificationFeedbackGenerator().notificationOccurred(.success)
+                    validateAndProcessInput()
+                } else {
+                    UINotificationFeedbackGenerator().notificationOccurred(.error)
+                }
             }) {
                 Image(systemName: "arrowtriangle.right.circle.fill")
                     .imageScale(.large)
@@ -268,10 +305,10 @@ struct ContentView: View {
                     .background(primaryColor)
                     .cornerRadius(12)
                     .shadow(radius: 2)
-                    .opacity(inputNumber.isEmpty ? 0.5 : 1.0)
+                    .opacity(inputNumber.isEmpty || inputNumber >= "9999999999" ? 0.5 : 1.0)
             }
-            .disabled(inputNumber.isEmpty)
-            .accessibilityLabel("Right Arrow")
+            .disabled(inputNumber.isEmpty || inputNumber >= "9999999999")
+            .accessibilityLabel("Next Prime")
         }
         .padding(.horizontal)
     }
