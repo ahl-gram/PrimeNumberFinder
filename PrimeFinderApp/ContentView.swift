@@ -485,7 +485,7 @@ struct ContentView: View {
                 if let url = URL(string: githubIssuesURL) {
                     VStack {
                         HStack {
-                            Text("Found a bug? Submit an issue here")
+                            Text("Found a bug? Submit an issue")
                                 .font(.body)
                             Spacer()
                             Button {
