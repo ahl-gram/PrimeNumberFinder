@@ -49,6 +49,47 @@ struct ContentView: View {
         return number > 0
     }
     
+    func isMersennePrime(_ number: Int) -> Bool {
+        // A Mersenne prime is a prime number of the form 2^n - 1
+        // First check if the number is prime
+        if !isPrime(number) {
+            return false
+        }
+        
+        // Check if the number is one less than a power of 2
+        let numberPlusOne = number + 1
+        
+        // If it's a power of 2, it will have exactly one bit set
+        // Using bitwise AND to check: (n & (n-1)) == 0
+        return (numberPlusOne & (numberPlusOne - 1)) == 0
+    }
+    
+    func allFactors(_ number: Int) -> [Int] {
+        // Return empty array for invalid inputs
+        if number < 1 {
+            return []
+        }
+        
+        // 1 only has itself as a factor
+        if number == 1 {
+            return [1]
+        }
+        
+        var factors = Set<Int>() // Use Set to avoid duplicates
+        
+        // Find factors up to the square root
+        let sqrtNum = Int(Double(number).squareRoot())
+        for i in 1...sqrtNum {
+            if number % i == 0 {
+                factors.insert(i)
+                factors.insert(number / i) // Insert the corresponding factor
+            }
+        }
+        
+        // Convert to array and sort
+        return Array(factors).sorted()
+    }
+    
     func isPrime(_ number: Int) -> Bool {
         if number < 2 { return false }
         if number == 2 || number == 3 { return true }
@@ -506,7 +547,7 @@ struct ContentView: View {
                     FeatureRow(icon: "checkmark.circle.fill", title: "Check Numbers", description: "Enter any positive integer to check if it's prime")
                     FeatureRow(icon: "plus.circle.fill", title: "Increment/Decrement", description: "Use + and - buttons to check nearby numbers")
                     FeatureRow(icon: "arrowtriangle.right.circle.fill", title: "Prime Navigation", description: "Use arrow buttons to find the next or previous prime number")
-                    FeatureRow(icon: "function", title: "Prime Factorization", description: "See the prime factorization of non-prime numbers")
+                    FeatureRow(icon: "function", title: "Prime Factorization", description: "See the prime factorization of composite numbers")
                     FeatureRow(icon: "clock.arrow.circlepath", title: "History", description: "View your previous number checks")
                 }
                 .padding(.vertical, 4)
