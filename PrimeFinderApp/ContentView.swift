@@ -228,9 +228,7 @@ struct ContentView: View {
             Button(action: {
                 if let number = Int(inputNumber) {
                     inputNumber = String(number - 1)
-                    if !result.isEmpty {
-                        validateAndProcessInput()
-                    }
+                    validateAndProcessInput()
                 }
             }) {
                 Image(systemName: "minus.circle.fill")
@@ -270,9 +268,7 @@ struct ContentView: View {
             Button(action: {
                 if let number = Int(inputNumber) {
                     inputNumber = String(number + 1)
-                    if !result.isEmpty {
-                        validateAndProcessInput()
-                    }
+                    validateAndProcessInput()
                 }
             }) {
                 Image(systemName: "plus.circle.fill")
@@ -357,7 +353,11 @@ struct ContentView: View {
                         .font(.subheadline)
                         .foregroundColor(item.result.contains("is a prime number") ? .green :
                                        item.result.contains("is not a prime number") ? primaryColor : .red)
-                    Text(item.timestamp, style: .time)
+                    Text(item.timestamp, formatter: {
+                        let formatter = DateFormatter()
+                        formatter.timeStyle = .medium
+                        return formatter
+                    }())
                         .font(.caption)
                         .foregroundColor(.gray)
                 }
