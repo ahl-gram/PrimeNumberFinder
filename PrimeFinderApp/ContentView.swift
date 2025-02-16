@@ -110,7 +110,8 @@ struct ContentView: View {
                 result = "\(formattedNumber) is a prime number."
             } else {
                 let factors = primeFactors(number)
-                result = "\(formattedNumber) is not a prime number.\nPrime factors: \(factors.map { String($0) }.joined(separator: " × "))"
+                let formattedFactors = factors.map { NumberFormatter.localizedString(from: NSNumber(value: $0), number: .decimal) }
+                result = "\(formattedNumber) is not a prime number.\nPrime factors: \(formattedFactors.joined(separator: " × "))"
             }
         }
         addToHistory(number: number, result: result)
