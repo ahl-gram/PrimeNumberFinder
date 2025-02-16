@@ -28,6 +28,9 @@ struct ContentView: View {
     
     // External URLs
     let wikipediaURL = "https://en.wikipedia.org/wiki/Prime_number"
+    let oeisURL = "https://oeis.org/A000040"
+    let appStoreURL = "http://apps.apple.com/us/app/prime-finder-app/id6741829020"
+    let githubIssuesURL = "http://github.com/ahl-gram/PrimeFinder/issues"
     
     // MARK: - Colors
     let primaryColor = Color.blue
@@ -425,8 +428,8 @@ struct ContentView: View {
             }
             
             Section(header: Text("Links")) {
-                VStack(alignment: .leading, spacing: 8) {
-                    if let url = URL(string: wikipediaURL) {
+                if let url = URL(string: wikipediaURL) {
+                    VStack {
                         HStack {
                             Text("Wikipedia: Prime Numbers")
                                 .font(.body)
@@ -435,13 +438,67 @@ struct ContentView: View {
                                 UIApplication.shared.open(url)
                             } label: {
                                 Image(systemName: "arrow.up.right.square")
-                                    .imageScale(.medium)
+                                    .imageScale(.large)
                                     .foregroundColor(.blue)
                             }
                         }
+                        .padding(.vertical, 2)
                     }
                 }
-                .padding(.vertical, 4)
+                
+                if let url = URL(string: oeisURL) {
+                    VStack {
+                        HStack {
+                            Text("OEIS: List of Prime Numbers")
+                                .font(.body)
+                            Spacer()
+                            Button {
+                                UIApplication.shared.open(url)
+                            } label: {
+                                Image(systemName: "arrow.up.right.square")
+                                    .imageScale(.large)
+                                    .foregroundColor(.blue)
+                            }
+                        }
+                        .padding(.vertical, 2)
+                    }
+                }
+                
+                if let url = URL(string: appStoreURL) {
+                    VStack {
+                        HStack {
+                            Text("Rate this app!")
+                                .font(.body)
+                            Spacer()
+                            Button {
+                                UIApplication.shared.open(url)
+                            } label: {
+                                Image(systemName: "arrow.up.right.square")
+                                    .imageScale(.large)
+                                    .foregroundColor(.blue)
+                            }
+                        }
+                        .padding(.vertical, 2)
+                    }
+                }
+                
+                if let url = URL(string: githubIssuesURL) {
+                    VStack {
+                        HStack {
+                            Text("Found a bug? Submit an issue here")
+                                .font(.body)
+                            Spacer()
+                            Button {
+                                UIApplication.shared.open(url)
+                            } label: {
+                                Image(systemName: "arrow.up.right.square")
+                                    .imageScale(.large)
+                                    .foregroundColor(.blue)
+                            }
+                        }
+                        .padding(.vertical, 2)
+                    }
+                }
             }
             
             Section(header: Text("Features")) {
