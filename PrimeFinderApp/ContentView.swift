@@ -250,7 +250,7 @@ struct ContentView: View {
                 HStack {
                     Image(systemName: "checkmark.circle.fill")
                         .imageScale(.large)
-                    Text("Calculate")
+                    Text("Check")
                         .font(.headline)
                 }
                 .foregroundColor(.white)
@@ -262,7 +262,7 @@ struct ContentView: View {
                 .opacity(inputNumber.isEmpty ? 0.5 : 1.0)
             }
             .disabled(inputNumber.isEmpty)
-            .accessibilityLabel("Calculate Button")
+            .accessibilityLabel("Check Button")
 
             // Plus Button
             Button(action: {
@@ -396,8 +396,7 @@ struct ContentView: View {
                         if let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String,
                            let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String {
                             Text("Version \(version) (\(build))")
-                                .font(.footnote)
-                                .foregroundColor(.secondary)
+                                .font(.body)
                         }
                     }
                     Spacer()
@@ -418,7 +417,7 @@ struct ContentView: View {
             
             Section(header: Text("Features")) {
                 VStack(alignment: .leading, spacing: 12) {
-                    FeatureRow(icon: "checkmark.circle.fill", title: "Calculate Numbers", description: "Enter any positive integer to check if it's prime")
+                    FeatureRow(icon: "checkmark.circle.fill", title: "Check Numbers", description: "Enter any positive integer to check if it's prime")
                     FeatureRow(icon: "plus.circle.fill", title: "Increment/Decrement", description: "Use + and - buttons to check nearby numbers")
                     FeatureRow(icon: "arrowtriangle.right.circle.fill", title: "Prime Navigation", description: "Use arrow buttons to find the next or previous prime number")
                     FeatureRow(icon: "function", title: "Prime Factorization", description: "See the prime factorization of non-prime numbers")
