@@ -19,6 +19,7 @@ struct ContentView: View {
     @State internal var result: String = ""
     @State internal var history: [HistoryItem] = []
     @State internal var showingHistory = false
+    @State internal var showingHelp = false
     @State internal var showingResetAlert = false
     @FocusState internal var isInputFocused: Bool
     
@@ -267,6 +268,16 @@ struct ContentView: View {
         }
     }
     
+    var helpButton: some View {
+        Button(action: {
+            showingHelp = true
+        }) {
+            Image(systemName: "info.circle")
+                .imageScale(.large)
+                .foregroundColor(primaryColor)
+        }
+    }
+    
     var historyView: some View {
         List {
             ForEach(history) { item in
@@ -307,6 +318,58 @@ struct ContentView: View {
         }
     }
     
+    var helpView: some View {
+        List {
+            Section {
+                HStack {
+                    Spacer()
+                    VStack(spacing: 4) {
+                        if let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String,
+                           let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String {
+                            Text("Version \(version) (\(build))")
+                                .font(.footnote)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    Spacer()
+                }
+                .padding(.vertical, 8)
+            }
+            
+            Section(header: Text("About Prime Finder")) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Prime Finder helps you explore prime numbers and factorization.")
+                        .font(.body)
+                    Text("A prime number is a natural number greater than 1 that is only divisible by 1 and itself.")
+                        .font(.body)
+                        .padding(.top, 4)
+                }
+                .padding(.vertical, 4)
+            }
+            
+            Section(header: Text("Features")) {
+                VStack(alignment: .leading, spacing: 12) {
+                    FeatureRow(icon: "number.circle.fill", title: "Check Numbers", description: "Enter any positive integer to check if it's prime")
+                    FeatureRow(icon: "plus.circle.fill", title: "Increment/Decrement", description: "Use + and - buttons to check nearby numbers")
+                    FeatureRow(icon: "function", title: "Prime Factorization", description: "See the prime factorization of non-prime numbers")
+                    FeatureRow(icon: "clock.arrow.circlepath", title: "History", description: "View your previous number checks")
+                }
+                .padding(.vertical, 4)
+            }
+            
+            Section(header: Text("Tips")) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("• Numbers are limited to 10 digits to prevent overflow")
+                    Text("• The minus button is disabled at 1 since prime numbers start at 2")
+                    Text("• Clear the input field using the X button")
+                    Text("• Tap anywhere to dismiss the keyboard")
+                }
+                .font(.body)
+                .padding(.vertical, 4)
+            }
+        }
+    }
+    
     // MARK: - Body
     var body: some View {
         NavigationView {
@@ -323,13 +386,25 @@ struct ContentView: View {
                 }
             }
             .navigationBarTitle("Prime Finder", displayMode: .large)
-            .navigationBarItems(trailing: historyButton)
+            .navigationBarItems(
+                leading: helpButton,
+                trailing: historyButton
+            )
             .sheet(isPresented: $showingHistory) {
                 NavigationView {
                     historyView
                         .navigationTitle("History")
                         .navigationBarItems(trailing: Button("Done") {
                             showingHistory = false
+                        })
+                }
+            }
+            .sheet(isPresented: $showingHelp) {
+                NavigationView {
+                    helpView
+                        .navigationTitle("About")
+                        .navigationBarItems(trailing: Button("Done") {
+                            showingHelp = false
                         })
                 }
             }
@@ -341,6 +416,30 @@ struct ContentView: View {
             }
         }
         .navigationViewStyle(.stack)
+    }
+}
+
+// Helper view for feature rows in help screen
+struct FeatureRow: View {
+    let icon: String
+    let title: String
+    let description: String
+    
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: icon)
+                .foregroundColor(.blue)
+                .imageScale(.large)
+                .frame(width: 24, height: 24)
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.headline)
+                Text(description)
+                    .font(.body)
+                    .foregroundColor(.secondary)
+            }
+        }
     }
 }
 
