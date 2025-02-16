@@ -72,17 +72,20 @@ struct ContentView: View {
         
         // 1 only has itself as a factor
         if number == 1 {
-            return [1]
+            return []
         }
         
         var factors = Set<Int>() // Use Set to avoid duplicates
         
         // Find factors up to the square root
         let sqrtNum = Int(Double(number).squareRoot())
-        for i in 1...sqrtNum {
+        for i in 2...sqrtNum {  // Start from 2 to exclude 1
             if number % i == 0 {
                 factors.insert(i)
-                factors.insert(number / i) // Insert the corresponding factor
+                let pair = number / i
+                if pair != i && pair != number {  // Exclude the number itself
+                    factors.insert(pair)
+                }
             }
         }
         
@@ -181,8 +184,17 @@ struct ContentView: View {
                 result = "\(formattedNumber) is a prime number."
             } else {
                 let factors = primeFactors(number)
+                let allFactorsList = allFactors(number)
                 let formattedFactors = factors.map { NumberFormatter.localizedString(from: NSNumber(value: $0), number: .decimal) }
-                result = "\(formattedNumber) is not a prime number.\nPrime factors: \(formattedFactors.joined(separator: " × "))"
+                
+                if allFactorsList.isEmpty {
+                    result = "\(formattedNumber) is not a prime number.\nPrime factors: \(formattedFactors.joined(separator: " × "))"
+                } else {
+                    let formattedAllFactors = allFactorsList.enumerated().map { index, factor in
+                        "\(index + 1)) \(NumberFormatter.localizedString(from: NSNumber(value: factor), number: .decimal))"
+                    }
+                    result = "\(formattedNumber) is not a prime number.\nPrime factors: \(formattedFactors.joined(separator: " × "))\n\nApart from 1 and itself, all factors are:\n\(formattedAllFactors.joined(separator: "\n"))"
+                }
             }
         }
         addToHistory(number: number, result: result)
@@ -366,7 +378,7 @@ struct ContentView: View {
         Text(result)
             .font(.body)
             .padding()
-            .multilineTextAlignment(.center)
+            .multilineTextAlignment(.leading)
             .accessibilityLabel("Result Text View")
             .foregroundColor(result.contains("is a prime")
                              ? .green
