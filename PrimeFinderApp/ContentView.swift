@@ -380,17 +380,31 @@ struct ContentView: View {
     }
     
     var resultView: some View {
-        Text(result)
-            .font(.body)
-            .padding()
-            .multilineTextAlignment(.leading)
-            .accessibilityLabel("Result Text View")
-            .foregroundColor(result.contains("is a prime")
-                             ? .green
-                             : result.contains("is not a prime") || result.contains("defined as not")
-                                ? primaryColor
-                                : .red)
-            .animation(.easeInOut, value: result)
+        VStack(alignment: .leading, spacing: 8) {
+            if !result.isEmpty {
+                let components = result.components(separatedBy: "\n")
+                if let firstLine = components.first {
+                    Text(firstLine)
+                        .font(.title3)
+                        .padding(.vertical, 4)
+                }
+                
+                if components.count > 1 {
+                    Text(components.dropFirst().joined(separator: "\n"))
+                        .font(.body)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding()
+        .multilineTextAlignment(.leading)
+        .accessibilityLabel("Result Text View")
+        .foregroundColor(result.contains("is a prime")
+                         ? .green
+                         : result.contains("is not a prime") || result.contains("defined as not")
+                            ? primaryColor
+                            : .red)
+        .animation(.easeInOut, value: result)
     }
     
     var historyButton: some View {
