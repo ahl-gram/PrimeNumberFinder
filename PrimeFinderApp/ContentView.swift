@@ -490,9 +490,13 @@ struct ContentView: View {
             
             Section(header: Text("Description")) {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Prime Finder helps you explore prime numbers and factorization.")
+                    Text("Prime Finder helps you explore prime numbers and their factorization.")
                         .font(.body)
                     Text("A prime number is a natural number greater than 1 that is only divisible by 1 and itself.")
+                        .font(.body)
+                    Text("A composite number is any natural number greater than 1 that is not prime.")
+                        .font(.body)
+                    Text("The number 1 is a special case in which it is defined as not prime.")
                         .font(.body)
                         .padding(.top, 4)
                 }
@@ -576,9 +580,10 @@ struct ContentView: View {
             Section(header: Text("Features")) {
                 VStack(alignment: .leading, spacing: 12) {
                     FeatureRow(icon: "checkmark.circle.fill", title: "Check Numbers", description: "Enter any positive integer to check if it's prime")
+                    FeatureRow(icon: "function", title: "Prime Factorization", description: "Composite numbers will automatically display their prime factorization")
                     FeatureRow(icon: "plus.circle.fill", title: "Increment/Decrement", description: "Use + and - buttons to check nearby numbers")
                     FeatureRow(icon: "arrowtriangle.right.circle.fill", title: "Prime Navigation", description: "Use arrow buttons to find the next or previous prime number")
-                    FeatureRow(icon: "function", title: "Prime Factorization", description: "See the prime factorization of composite numbers")
+                    FeatureRow(icon: "list.bullet", title: "Show All Factors", description: "Toggle to view all factors of composite numbers")
                     FeatureRow(icon: "clock.arrow.circlepath", title: "History", description: "View your previous number checks")
                 }
                 .padding(.vertical, 4)
