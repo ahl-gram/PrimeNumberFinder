@@ -168,12 +168,18 @@ struct ContentView: View {
                     UIImpactFeedbackGenerator(style: .light).impactOccurred()
                 }
                 
+                // Remove leading zeros unless the entire input is "0"
+                var processedInput = filtered
+                if processedInput.count > 1 && processedInput.first == "0" {
+                    processedInput = String(Int(processedInput) ?? 0)
+                }
+                
                 // Enforce maximum length
-                if filtered.count > maxInputLength {
-                    inputNumber = String(filtered.prefix(maxInputLength))
+                if processedInput.count > maxInputLength {
+                    inputNumber = String(processedInput.prefix(maxInputLength))
                     UINotificationFeedbackGenerator().notificationOccurred(.warning)
                 } else {
-                    inputNumber = filtered
+                    inputNumber = processedInput
                 }
             }
             .overlay(
