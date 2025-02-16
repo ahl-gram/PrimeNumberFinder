@@ -219,9 +219,9 @@ struct ContentView: View {
                     .background(primaryColor)
                     .cornerRadius(12)
                     .shadow(radius: 2)
-                    .opacity(inputNumber.isEmpty || inputNumber <= "1" ? 0.5 : 1.0)
+                    .opacity(inputNumber.isEmpty || (Int(inputNumber) ?? 0) <= 2 ? 0.5 : 1.0)
             }
-            .disabled(inputNumber.isEmpty || inputNumber <= "1")
+            .disabled(inputNumber.isEmpty || (Int(inputNumber) ?? 0) <= 2)
             .accessibilityLabel("Previous Prime")
 
             // Minus Button
@@ -418,8 +418,9 @@ struct ContentView: View {
             
             Section(header: Text("Features")) {
                 VStack(alignment: .leading, spacing: 12) {
-                    FeatureRow(icon: "number.circle.fill", title: "Calculate Numbers", description: "Enter any positive integer to check if it's prime")
+                    FeatureRow(icon: "checkmark.circle.fill", title: "Calculate Numbers", description: "Enter any positive integer to check if it's prime")
                     FeatureRow(icon: "plus.circle.fill", title: "Increment/Decrement", description: "Use + and - buttons to check nearby numbers")
+                    FeatureRow(icon: "arrowtriangle.right.circle.fill", title: "Prime Navigation", description: "Use arrow buttons to find the next or previous prime number")
                     FeatureRow(icon: "function", title: "Prime Factorization", description: "See the prime factorization of non-prime numbers")
                     FeatureRow(icon: "clock.arrow.circlepath", title: "History", description: "View your previous number checks")
                 }
@@ -429,7 +430,6 @@ struct ContentView: View {
             Section(header: Text("Tips")) {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("• Numbers are limited to 10 digits to prevent overflow")
-                    Text("• The minus button is disabled at 1 since prime numbers start at 2")
                     Text("• Clear the input field using the X button")
                     Text("• Tap anywhere to dismiss the keyboard")
                 }
