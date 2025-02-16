@@ -178,6 +178,22 @@ struct ContentView: View {
     
     var checkButton: some View {
         HStack(spacing: 10) {
+            // Left Arrow Button
+            Button(action: {
+                // No action yet
+            }) {
+                Image(systemName: "arrowtriangle.left.circle.fill")
+                    .imageScale(.large)
+                    .foregroundColor(.white)
+                    .frame(width: 44, height: 44)
+                    .background(primaryColor)
+                    .cornerRadius(12)
+                    .shadow(radius: 2)
+                    .opacity(inputNumber.isEmpty ? 0.5 : 1.0)
+            }
+            .disabled(inputNumber.isEmpty)
+            .accessibilityLabel("Left Arrow")
+
             // Minus Button
             Button(action: {
                 if let number = Int(inputNumber) {
@@ -206,7 +222,7 @@ struct ContentView: View {
                 HStack {
                     Image(systemName: "checkmark.circle.fill")
                         .imageScale(.large)
-                    Text("Check Number")
+                    Text("Calculate")
                         .font(.headline)
                 }
                 .foregroundColor(.white)
@@ -218,7 +234,7 @@ struct ContentView: View {
                 .opacity(inputNumber.isEmpty ? 0.5 : 1.0)
             }
             .disabled(inputNumber.isEmpty)
-            .accessibilityLabel("Check Number Button")
+            .accessibilityLabel("Calculate Button")
 
             // Plus Button
             Button(action: {
@@ -240,6 +256,22 @@ struct ContentView: View {
             }
             .disabled(inputNumber.isEmpty || inputNumber >= "9999999999")
             .accessibilityLabel("Increment Number")
+
+            // Right Arrow Button
+            Button(action: {
+                // No action yet
+            }) {
+                Image(systemName: "arrowtriangle.right.circle.fill")
+                    .imageScale(.large)
+                    .foregroundColor(.white)
+                    .frame(width: 44, height: 44)
+                    .background(primaryColor)
+                    .cornerRadius(12)
+                    .shadow(radius: 2)
+                    .opacity(inputNumber.isEmpty ? 0.5 : 1.0)
+            }
+            .disabled(inputNumber.isEmpty)
+            .accessibilityLabel("Right Arrow")
         }
         .padding(.horizontal)
     }
@@ -349,7 +381,7 @@ struct ContentView: View {
             
             Section(header: Text("Features")) {
                 VStack(alignment: .leading, spacing: 12) {
-                    FeatureRow(icon: "number.circle.fill", title: "Check Numbers", description: "Enter any positive integer to check if it's prime")
+                    FeatureRow(icon: "number.circle.fill", title: "Calculate Numbers", description: "Enter any positive integer to check if it's prime")
                     FeatureRow(icon: "plus.circle.fill", title: "Increment/Decrement", description: "Use + and - buttons to check nearby numbers")
                     FeatureRow(icon: "function", title: "Prime Factorization", description: "See the prime factorization of non-prime numbers")
                     FeatureRow(icon: "clock.arrow.circlepath", title: "History", description: "View your previous number checks")
