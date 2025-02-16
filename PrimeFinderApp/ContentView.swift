@@ -26,6 +26,9 @@ struct ContentView: View {
     // MARK: - Constants
     let maxInputLength = 10 // Prevent integer overflow
     
+    // External URLs
+    let wikipediaURL = "https://en.wikipedia.org/wiki/Prime_number"
+    
     // MARK: - Colors
     let primaryColor = Color.blue
     let backgroundColor = Color(.systemBackground)
@@ -401,7 +404,7 @@ struct ContentView: View {
                     VStack(spacing: 4) {
                         if let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String,
                            let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String {
-                            Text("Version \(version) (\(build))")
+                            Text("Prime Finder v\(version) (\(build))")
                                 .font(.body)
                         }
                     }
@@ -410,13 +413,33 @@ struct ContentView: View {
                 .padding(.vertical, 8)
             }
             
-            Section(header: Text("About Prime Finder")) {
+            Section(header: Text("Description")) {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Prime Finder helps you explore prime numbers and factorization.")
                         .font(.body)
                     Text("A prime number is a natural number greater than 1 that is only divisible by 1 and itself.")
                         .font(.body)
                         .padding(.top, 4)
+                }
+                .padding(.vertical, 4)
+            }
+            
+            Section(header: Text("Links")) {
+                VStack(alignment: .leading, spacing: 8) {
+                    if let url = URL(string: wikipediaURL) {
+                        HStack {
+                            Text("Wikipedia: Prime Numbers")
+                                .font(.body)
+                            Spacer()
+                            Button {
+                                UIApplication.shared.open(url)
+                            } label: {
+                                Image(systemName: "arrow.up.right.square")
+                                    .imageScale(.medium)
+                                    .foregroundColor(.blue)
+                            }
+                        }
+                    }
                 }
                 .padding(.vertical, 4)
             }
@@ -437,8 +460,20 @@ struct ContentView: View {
                     Text("• Numbers are limited to 10 digits to prevent overflow")
                     Text("• Clear the input field using the X button")
                     Text("• Tap anywhere to dismiss the keyboard")
+                    Text("• Try rotating your device to landscape mode for more visual space")
                 }
                 .font(.body)
+                .padding(.vertical, 4)
+            }
+            
+            Section {
+                HStack {
+                    Spacer()
+                    Text("© 2025 Alexander Lee - Route 12B Software")
+                        .font(.caption)
+                        .foregroundColor(.green)
+                    Spacer()
+                }
                 .padding(.vertical, 4)
             }
         }
