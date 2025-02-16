@@ -21,6 +21,7 @@ struct ContentView: View {
     @State internal var showingHistory = false
     @State internal var showingHelp = false
     @State internal var showingResetAlert = false
+    @State internal var showAllFactors = false
     @FocusState internal var isInputFocused: Bool
     
     // MARK: - Constants
@@ -184,16 +185,20 @@ struct ContentView: View {
                 result = "\(formattedNumber) is a prime number."
             } else {
                 let factors = primeFactors(number)
-                let allFactorsList = allFactors(number)
                 let formattedFactors = factors.map { NumberFormatter.localizedString(from: NSNumber(value: $0), number: .decimal) }
                 
-                if allFactorsList.isEmpty {
-                    result = "\(formattedNumber) is not a prime number.\nPrime factors: \(formattedFactors.joined(separator: " × "))"
-                } else {
-                    let formattedAllFactors = allFactorsList.enumerated().map { index, factor in
-                        "\(index + 1)) \(NumberFormatter.localizedString(from: NSNumber(value: factor), number: .decimal))"
+                if showAllFactors {
+                    let allFactorsList = allFactors(number)
+                    if allFactorsList.isEmpty {
+                        result = "\(formattedNumber) is not a prime number.\nPrime factors: \(formattedFactors.joined(separator: " × "))"
+                    } else {
+                        let formattedAllFactors = allFactorsList.enumerated().map { index, factor in
+                            "\(index + 1)) \(NumberFormatter.localizedString(from: NSNumber(value: factor), number: .decimal))"
+                        }
+                        result = "\(formattedNumber) is not a prime number.\nPrime factors: \(formattedFactors.joined(separator: " × "))\n\nApart from 1 and itself, all factors are:\n\(formattedAllFactors.joined(separator: "\n"))"
                     }
-                    result = "\(formattedNumber) is not a prime number.\nPrime factors: \(formattedFactors.joined(separator: " × "))\n\nApart from 1 and itself, all factors are:\n\(formattedAllFactors.joined(separator: "\n"))"
+                } else {
+                    result = "\(formattedNumber) is not a prime number.\nPrime factors: \(formattedFactors.joined(separator: " × "))"
                 }
             }
         }
@@ -595,14 +600,29 @@ struct ContentView: View {
             ZStack {
                 backgroundColor.ignoresSafeArea()
                 
-                ScrollView {
-                    VStack(spacing: 20) {
-                        inputField
-                        checkButton
+                VStack(spacing: 20) {
+                    inputField
+                    checkButton
+                    Toggle(isOn: $showAllFactors) {
+                        Text("Show all factors")
+                            .font(.body)
+                    }
+                    .padding(.horizontal)
+                    .tint(primaryColor)
+                    .onChange(of: showAllFactors) { newValue in
+                        if !result.isEmpty && !inputNumber.isEmpty && isValidInput(inputNumber) {
+                            validateAndProcessInput()
+                        }
+                    }
+                    
+                    ScrollView {
                         resultView
                     }
-                    .padding(.top)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .cornerRadius(12)
+                    .padding(.horizontal)
                 }
+                .padding(.top)
             }
             .navigationBarTitle("Prime Finder", displayMode: .large)
             .navigationBarItems(
