@@ -552,6 +552,80 @@ struct ContentView: View {
                 .padding(.vertical, 4)
             }
             
+            Section(header: Text("Links")) {
+                if let url = URL(string: wikipediaURL) {
+                    VStack {
+                        HStack {
+                            Text("Wikipedia: Prime Numbers")
+                                .font(.body)
+                            Spacer()
+                            Button {
+                                UIApplication.shared.open(url)
+                            } label: {
+                                Image(systemName: "arrow.up.right.square")
+                                    .imageScale(.large)
+                                    .foregroundColor(.blue)
+                            }
+                        }
+                        .padding(.vertical, 2)
+                    }
+                }
+                
+                if let url = URL(string: oeisURL) {
+                    VStack {
+                        HStack {
+                            Text("OEIS: List of Prime Numbers")
+                                .font(.body)
+                            Spacer()
+                            Button {
+                                UIApplication.shared.open(url)
+                            } label: {
+                                Image(systemName: "arrow.up.right.square")
+                                    .imageScale(.large)
+                                    .foregroundColor(.blue)
+                            }
+                        }
+                        .padding(.vertical, 2)
+                    }
+                }
+                
+                if let url = URL(string: appStoreURL) {
+                    VStack {
+                        HStack {
+                            Text("Rate this app!")
+                                .font(.body)
+                            Spacer()
+                            Button {
+                                UIApplication.shared.open(url)
+                            } label: {
+                                Image(systemName: "arrow.up.right.square")
+                                    .imageScale(.large)
+                                    .foregroundColor(.blue)
+                            }
+                        }
+                        .padding(.vertical, 2)
+                    }
+                }
+                
+                if let url = URL(string: githubIssuesURL) {
+                    VStack {
+                        HStack {
+                            Text("Found a bug? Submit an issue")
+                                .font(.body)
+                            Spacer()
+                            Button {
+                                UIApplication.shared.open(url)
+                            } label: {
+                                Image(systemName: "arrow.up.right.square")
+                                    .imageScale(.large)
+                                    .foregroundColor(.blue)
+                            }
+                        }
+                        .padding(.vertical, 2)
+                    }
+                }
+            }
+            
             Section(header: Text("Features")) {
                 VStack(alignment: .leading, spacing: 12) {
                     FeatureRow(icon: "checkmark.circle.fill", title: "Check Numbers", description: "Enter any positive integer to check if it's prime")
@@ -573,7 +647,7 @@ struct ContentView: View {
                     Text("• Green results indicate prime numbers")
                     Text("• Blue results indicate composite numbers")
                     Text("• Tap any result to explore more details")
-                    Text("• Try rotating your device to landscape mode for more visual space")
+                    Text("• Rotate your device to landscape mode for more horizontal space")
                 }
                 .font(.body)
                 .padding(.vertical, 4)
