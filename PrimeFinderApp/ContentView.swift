@@ -22,6 +22,7 @@ struct ContentView: View {
     @State internal var showingHelp = false
     @State internal var showingResetAlert = false
     @State internal var isResultExpanded = false
+    @State private var editMode = EditMode.inactive
     @FocusState internal var isInputFocused: Bool
     
     // MARK: - Constants
@@ -380,18 +381,20 @@ struct ContentView: View {
                         if let firstLine = components.first {
                             HStack {
                                 Text(firstLine)
-                                    .font(.headline)
+                                    .font(result.contains("Please enter") ? .body : .headline)
                                     .foregroundColor(result.contains("is a prime")
                                                    ? .green
                                                    : result.contains("is not a prime") || result.contains("defined as not")
                                                    ? primaryColor
                                                    : .red)
                                 Spacer()
-                                Image(systemName: isResultExpanded ? "chevron.up.circle.fill" : "chevron.down.circle.fill")
-                                    .foregroundColor(result.contains("is a prime")
-                                                   ? .green
-                                                   : primaryColor)
-                                    .imageScale(.large)
+                                if !result.contains("Please enter") {
+                                    Image(systemName: isResultExpanded ? "chevron.up.circle.fill" : "chevron.down.circle.fill")
+                                        .foregroundColor(result.contains("is a prime")
+                                                       ? .green
+                                                       : primaryColor)
+                                        .imageScale(.large)
+                                }
                             }
                         }
                         
@@ -483,7 +486,7 @@ struct ContentView: View {
                     Text(item.result)
                         .font(.subheadline)
                         .foregroundColor(item.result.contains("is a prime number") ? .green :
-                                       item.result.contains("is not a prime number") ? primaryColor : .red)
+                                            item.result.contains("is not a prime number") || item.result.contains("defined as not") ? primaryColor : .red)
                     Text(item.timestamp, formatter: {
                         let formatter = DateFormatter()
                         formatter.timeStyle = .medium
@@ -496,21 +499,6 @@ struct ContentView: View {
             }
             .onDelete { indexSet in
                 history.remove(atOffsets: indexSet)
-            }
-        }
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                if !history.isEmpty {
-                    Button(action: {
-                        showingResetAlert = true
-                    }) {
-                        Image(systemName: "trash")
-                            .foregroundColor(.red)
-                    }
-                }
-            }
-            ToolbarItem(placement: .navigationBarTrailing) {
-                EditButton()
             }
         }
         .alert("Clear History", isPresented: $showingResetAlert) {
@@ -556,87 +544,13 @@ struct ContentView: View {
                 .padding(.vertical, 4)
             }
             
-            Section(header: Text("Links")) {
-                if let url = URL(string: wikipediaURL) {
-                    VStack {
-                        HStack {
-                            Text("Wikipedia: Prime Numbers")
-                                .font(.body)
-                            Spacer()
-                            Button {
-                                UIApplication.shared.open(url)
-                            } label: {
-                                Image(systemName: "arrow.up.right.square")
-                                    .imageScale(.large)
-                                    .foregroundColor(.blue)
-                            }
-                        }
-                        .padding(.vertical, 2)
-                    }
-                }
-                
-                if let url = URL(string: oeisURL) {
-                    VStack {
-                        HStack {
-                            Text("OEIS: List of Prime Numbers")
-                                .font(.body)
-                            Spacer()
-                            Button {
-                                UIApplication.shared.open(url)
-                            } label: {
-                                Image(systemName: "arrow.up.right.square")
-                                    .imageScale(.large)
-                                    .foregroundColor(.blue)
-                            }
-                        }
-                        .padding(.vertical, 2)
-                    }
-                }
-                
-                if let url = URL(string: appStoreURL) {
-                    VStack {
-                        HStack {
-                            Text("Rate this app!")
-                                .font(.body)
-                            Spacer()
-                            Button {
-                                UIApplication.shared.open(url)
-                            } label: {
-                                Image(systemName: "arrow.up.right.square")
-                                    .imageScale(.large)
-                                    .foregroundColor(.blue)
-                            }
-                        }
-                        .padding(.vertical, 2)
-                    }
-                }
-                
-                if let url = URL(string: githubIssuesURL) {
-                    VStack {
-                        HStack {
-                            Text("Found a bug? Submit an issue")
-                                .font(.body)
-                            Spacer()
-                            Button {
-                                UIApplication.shared.open(url)
-                            } label: {
-                                Image(systemName: "arrow.up.right.square")
-                                    .imageScale(.large)
-                                    .foregroundColor(.blue)
-                            }
-                        }
-                        .padding(.vertical, 2)
-                    }
-                }
-            }
-            
             Section(header: Text("Features")) {
                 VStack(alignment: .leading, spacing: 12) {
                     FeatureRow(icon: "checkmark.circle.fill", title: "Check Numbers", description: "Enter any positive integer to check if it's prime")
                     FeatureRow(icon: "function", title: "Prime Factorization", description: "Composite numbers will automatically display their prime factorization")
                     FeatureRow(icon: "plus.circle.fill", title: "Increment/Decrement", description: "Use + and - buttons to check nearby numbers")
                     FeatureRow(icon: "arrowtriangle.right.circle.fill", title: "Prime Navigation", description: "Use arrow buttons to find the next or previous prime number")
-                    FeatureRow(icon: "list.bullet", title: "Show All Factors", description: "Toggle to view all factors of composite numbers")
+                    FeatureRow(icon: "chevron.down.circle.fill", title: "Interactive Results", description: "Tap on results to view additional information and all factors for composite numbers")
                     FeatureRow(icon: "clock.arrow.circlepath", title: "History", description: "View your previous number checks")
                 }
                 .padding(.vertical, 4)
@@ -647,6 +561,9 @@ struct ContentView: View {
                     Text("• Numbers are limited to 10 digits to prevent overflow")
                     Text("• Clear the input field using the X button")
                     Text("• Tap anywhere to dismiss the keyboard")
+                    Text("• Green results indicate prime numbers")
+                    Text("• Blue results indicate composite numbers")
+                    Text("• Tap any result to explore more details")
                     Text("• Try rotating your device to landscape mode for more visual space")
                 }
                 .font(.body)
@@ -694,9 +611,36 @@ struct ContentView: View {
                 NavigationView {
                     historyView
                         .navigationTitle("History")
-                        .navigationBarItems(trailing: Button("Done") {
-                            showingHistory = false
-                        })
+                        .navigationBarItems(
+                            leading: Group {
+                                HStack(spacing: 16) {
+                                    if !history.isEmpty {
+                                        Button(action: {
+                                            showingResetAlert = true
+                                        }) {
+                                            Image(systemName: "trash")
+                                                .foregroundColor(.red)
+                                        }
+                                    }
+                                    Button(action: {
+                                        withAnimation {
+                                            editMode = editMode.isEditing ? .inactive : .active
+                                        }
+                                    }) {
+                                        Image(systemName: editMode.isEditing ? "checkmark" : "square.and.pencil")
+                                            .foregroundColor(editMode.isEditing ? .blue : .blue)
+                                    }
+                                }
+                            },
+                            trailing: Group {
+                                if editMode == .inactive {
+                                    Button("Done") {
+                                        showingHistory = false
+                                    }
+                                }
+                            }
+                        )
+                        .environment(\.editMode, $editMode)
                 }
             }
             .sheet(isPresented: $showingHelp) {
