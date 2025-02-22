@@ -520,7 +520,7 @@ struct ContentView: View {
                     VStack(spacing: 4) {
                         if let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String,
                            let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String {
-                            Text("Prime Finder v\(version) (\(build))")
+                            Text("Prime Number Finder v\(version) (\(build))")
                                 .font(.body)
                         }
                     }
@@ -531,7 +531,7 @@ struct ContentView: View {
             
             Section(header: Text("Description")) {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Prime Finder helps you explore prime numbers and their factorization.")
+                    Text("Prime Number Finder helps you explore prime numbers and their factorization.")
                         .font(.body)
                     Text("A prime number is a natural number greater than 1 that is only divisible by 1 and itself.")
                         .font(.body)
@@ -602,7 +602,7 @@ struct ContentView: View {
                 }
                 .padding(.top)
             }
-            .navigationBarTitle("Prime Finder", displayMode: .large)
+            .navigationBarTitle("Prime Number Finder", displayMode: .large)
             .navigationBarItems(
                 leading: helpButton,
                 trailing: historyButton
