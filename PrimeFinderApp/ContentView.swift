@@ -21,7 +21,6 @@ struct ContentView: View {
     @State internal var showingHistory = false
     @State internal var showingHelp = false
     @State internal var showingResetAlert = false
-    @State internal var showAllFactors = false
     @State internal var isResultExpanded = false
     @FocusState internal var isInputFocused: Bool
     
@@ -187,7 +186,7 @@ struct ContentView: View {
             } else {
                 let factors = primeFactors(number)
                 let formattedFactors = factors.map { NumberFormatter.localizedString(from: NSNumber(value: $0), number: .decimal) }
-                result = "🔵 \(formattedNumber) is not a prime number.\nPrime factors: \(formattedFactors.joined(separator: " × "))"
+                result = "🔹 \(formattedNumber) is not a prime number.\nPrime factors: \(formattedFactors.joined(separator: " × "))"
             }
         }
         addToHistory(number: number, result: result)
@@ -676,17 +675,6 @@ struct ContentView: View {
                 VStack(spacing: 20) {
                     inputField
                     checkButton
-                    Toggle(isOn: $showAllFactors) {
-                        Text("Show all factors")
-                            .font(.body)
-                    }
-                    .padding(.horizontal)
-                    .tint(primaryColor)
-                    .onChange(of: showAllFactors) { newValue in
-                        if !result.isEmpty && !inputNumber.isEmpty && isValidInput(inputNumber) {
-                            validateAndProcessInput()
-                        }
-                    }
                     
                     ScrollView {
                         resultView
