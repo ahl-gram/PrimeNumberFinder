@@ -424,8 +424,8 @@ struct ContentView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             ForEach(Array(factors.enumerated()), id: \.element) { index, factor in
                                 HStack(spacing: 12) {
-                                    Text("\(index + 1))")
-                                        .font(.system(.body, design: .monospaced))
+                                    Text("\(index + 1).")
+                                        .font(.body)
                                         .foregroundColor(.gray)
                                     Text("\(factor)")
                                         .font(.system(.body, design: .monospaced))
