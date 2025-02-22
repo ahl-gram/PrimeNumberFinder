@@ -23,6 +23,8 @@ struct ContentView: View {
     @State internal var showingResetAlert = false
     @State internal var isResultExpanded = false
     @State private var editMode = EditMode.inactive
+    @State private var showingFactorAlert = false
+    @State private var selectedFactor: Int = 0
     @FocusState internal var isInputFocused: Bool
     
     // MARK: - Constants
@@ -427,15 +429,21 @@ struct ContentView: View {
                                     Text("\(index + 1).")
                                         .font(.body)
                                         .foregroundColor(.gray)
-                                    Text("\(factor)")
-                                        .font(.system(.body, design: .monospaced))
-                                        .padding(.vertical, 8)
-                                        .padding(.horizontal, 12)
-                                        .background(
-                                            RoundedRectangle(cornerRadius: 8)
-                                                .fill(primaryColor.opacity(0.1))
-                                        )
-                                        .foregroundColor(primaryColor)
+                                    Button(action: {
+                                        inputNumber = String(factor)
+                                        validateAndProcessInput()
+                                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                                    }) {
+                                        Text("\(factor)")
+                                            .font(.system(.body, design: .monospaced))
+                                            .padding(.vertical, 8)
+                                            .padding(.horizontal, 12)
+                                            .background(
+                                                RoundedRectangle(cornerRadius: 8)
+                                                    .fill(primaryColor.opacity(0.1))
+                                            )
+                                            .foregroundColor(primaryColor)
+                                    }
                                 }
                             }
                         }
@@ -551,6 +559,7 @@ struct ContentView: View {
                     FeatureRow(icon: "plus.circle.fill", title: "Increment/Decrement", description: "Use + and - buttons to check nearby numbers")
                     FeatureRow(icon: "arrowtriangle.right.circle.fill", title: "Prime Navigation", description: "Use arrow buttons to find the next or previous prime number")
                     FeatureRow(icon: "chevron.down.circle.fill", title: "Interactive Results", description: "Tap on results to view additional information and all factors for composite numbers")
+                    FeatureRow(icon: "number.circle", title: "Interactive Factors", description: "Tap on any factor to instantly check if it's prime")
                     FeatureRow(icon: "clock.arrow.circlepath", title: "History", description: "View your previous number checks")
                 }
                 .padding(.vertical, 4)
