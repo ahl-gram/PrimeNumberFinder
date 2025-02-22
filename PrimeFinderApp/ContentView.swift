@@ -416,46 +416,51 @@ struct ContentView: View {
                 .buttonStyle(PlainButtonStyle())
                 .frame(maxWidth: .infinity)
                 
-                if isResultExpanded, let number = Int(inputNumber), !isPrime(number), number > 1 {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("🔢 All Factors")
-                            .font(.headline)
-                            .foregroundColor(primaryColor)
-                        
-                        let factors = allFactors(number).sorted()
-                        VStack(alignment: .leading, spacing: 8) {
-                            ForEach(Array(factors.enumerated()), id: \.element) { index, factor in
-                                HStack(spacing: 12) {
-                                    Text("\(index + 1).")
-                                        .font(.body)
-                                        .foregroundColor(.gray)
-                                    Button(action: {
-                                        inputNumber = String(factor)
-                                        validateAndProcessInput()
-                                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                                    }) {
-                                        Text("\(factor)")
-                                            .font(.system(.body, design: .monospaced))
-                                            .padding(.vertical, 8)
-                                            .padding(.horizontal, 12)
-                                            .background(
-                                                RoundedRectangle(cornerRadius: 8)
-                                                    .fill(primaryColor.opacity(0.1))
-                                            )
-                                            .foregroundColor(primaryColor)
+                if isResultExpanded {
+                    if let number = Int(inputNumber) {
+                        VStack(alignment: .leading, spacing: 12) {
+                            if !isPrime(number) && number > 1 {
+                                Text("🔢 All Factors")
+                                    .font(.headline)
+                                    .foregroundColor(primaryColor)
+                                
+                                let factors = allFactors(number).sorted()
+                                VStack(alignment: .leading, spacing: 8) {
+                                    ForEach(Array(factors.enumerated()), id: \.element) { index, factor in
+                                        HStack(spacing: 12) {
+                                            Text("\(index + 1).")
+                                                .font(.body)
+                                                .foregroundColor(.gray)
+                                            Button(action: {
+                                                inputNumber = String(factor)
+                                                validateAndProcessInput()
+                                                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                                            }) {
+                                                Text("\(factor)")
+                                                    .font(.system(.body, design: .monospaced))
+                                                    .padding(.vertical, 8)
+                                                    .padding(.horizontal, 12)
+                                                    .background(
+                                                        RoundedRectangle(cornerRadius: 8)
+                                                            .fill(primaryColor.opacity(0.1))
+                                                    )
+                                                    .foregroundColor(primaryColor)
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .frame(minHeight: 100) // Changed to minHeight instead of fixed height
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color(.systemGray6))
+                        )
+                        .padding(.top, 4)
+                        .transition(.move(edge: .top).combined(with: .opacity))
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color(.systemGray6))
-                    )
-                    .padding(.top, 4)
-                    .transition(.move(edge: .top).combined(with: .opacity))
                 }
             }
         }
