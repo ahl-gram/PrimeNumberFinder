@@ -22,6 +22,7 @@ struct ContentView: View {
     @State internal var showingHelp = false
     @State internal var showingResetAlert = false
     @State internal var showAllFactors = false
+    @State internal var isResultExpanded = false
     @FocusState internal var isInputFocused: Bool
     
     // MARK: - Constants
@@ -182,24 +183,11 @@ struct ContentView: View {
         }
         else {
             if isPrime(number) {
-                result = "\(formattedNumber) is a prime number."
+                result = "✅ \(formattedNumber) is a prime number."
             } else {
                 let factors = primeFactors(number)
                 let formattedFactors = factors.map { NumberFormatter.localizedString(from: NSNumber(value: $0), number: .decimal) }
-                
-                if showAllFactors {
-                    let allFactorsList = allFactors(number)
-                    if allFactorsList.isEmpty {
-                        result = "\(formattedNumber) is not a prime number.\nPrime factors: \(formattedFactors.joined(separator: " × "))"
-                    } else {
-                        let formattedAllFactors = allFactorsList.enumerated().map { index, factor in
-                            "\(index + 1)) \(NumberFormatter.localizedString(from: NSNumber(value: factor), number: .decimal))"
-                        }
-                        result = "\(formattedNumber) is not a prime number.\nPrime factors: \(formattedFactors.joined(separator: " × "))\n\nApart from 1 and itself, all factors are:\n\(formattedAllFactors.joined(separator: "\n"))"
-                    }
-                } else {
-                    result = "\(formattedNumber) is not a prime number.\nPrime factors: \(formattedFactors.joined(separator: " × "))"
-                }
+                result = "🔵 \(formattedNumber) is not a prime number.\nPrime factors: \(formattedFactors.joined(separator: " × "))"
             }
         }
         addToHistory(number: number, result: result)
@@ -380,30 +368,90 @@ struct ContentView: View {
     }
     
     var resultView: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(spacing: 8) {
             if !result.isEmpty {
                 let components = result.components(separatedBy: "\n")
-                if let firstLine = components.first {
-                    Text(firstLine)
-                        .font(.title3)
-                        .padding(.vertical, 4)
+                Button(action: {
+                    withAnimation(.spring()) {
+                        isResultExpanded.toggle()
+                    }
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                }) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        if let firstLine = components.first {
+                            HStack {
+                                Text(firstLine)
+                                    .font(.headline)
+                                    .foregroundColor(result.contains("is a prime")
+                                                   ? .green
+                                                   : result.contains("is not a prime") || result.contains("defined as not")
+                                                   ? primaryColor
+                                                   : .red)
+                                Spacer()
+                                Image(systemName: isResultExpanded ? "chevron.up.circle.fill" : "chevron.down.circle.fill")
+                                    .foregroundColor(result.contains("is a prime")
+                                                   ? .green
+                                                   : primaryColor)
+                                    .imageScale(.large)
+                            }
+                        }
+                        
+                        if components.count > 1 {
+                            Text(components.dropFirst().joined(separator: "\n"))
+                                .font(.body)
+                                .foregroundColor(primaryColor)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color(.systemGray6))
+                    )
                 }
+                .buttonStyle(PlainButtonStyle())
+                .frame(maxWidth: .infinity)
                 
-                if components.count > 1 {
-                    Text(components.dropFirst().joined(separator: "\n"))
-                        .font(.body)
+                if isResultExpanded, let number = Int(inputNumber), !isPrime(number), number > 1 {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("🔢 All Factors")
+                            .font(.headline)
+                            .foregroundColor(primaryColor)
+                        
+                        let factors = allFactors(number).sorted()
+                        VStack(alignment: .leading, spacing: 8) {
+                            ForEach(Array(factors.enumerated()), id: \.element) { index, factor in
+                                HStack(spacing: 12) {
+                                    Text("\(index + 1))")
+                                        .font(.system(.body, design: .monospaced))
+                                        .foregroundColor(.gray)
+                                    Text("\(factor)")
+                                        .font(.system(.body, design: .monospaced))
+                                        .padding(.vertical, 8)
+                                        .padding(.horizontal, 12)
+                                        .background(
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .fill(primaryColor.opacity(0.1))
+                                        )
+                                        .foregroundColor(primaryColor)
+                                }
+                            }
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color(.systemGray6))
+                    )
+                    .padding(.top, 4)
+                    .transition(.move(edge: .top).combined(with: .opacity))
                 }
             }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding()
+        .padding(.horizontal)
         .multilineTextAlignment(.leading)
         .accessibilityLabel("Result Text View")
-        .foregroundColor(result.contains("is a prime")
-                         ? .green
-                         : result.contains("is not a prime") || result.contains("defined as not")
-                            ? primaryColor
-                            : .red)
         .animation(.easeInOut, value: result)
     }
     
@@ -447,6 +495,9 @@ struct ContentView: View {
                 }
                 .padding(.vertical, 4)
             }
+            .onDelete { indexSet in
+                history.remove(atOffsets: indexSet)
+            }
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
@@ -458,6 +509,9 @@ struct ContentView: View {
                             .foregroundColor(.red)
                     }
                 }
+            }
+            ToolbarItem(placement: .navigationBarTrailing) {
+                EditButton()
             }
         }
         .alert("Clear History", isPresented: $showingResetAlert) {
