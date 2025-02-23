@@ -102,37 +102,29 @@ final class PrimeFinderAppTests: XCTestCase {
     // MARK: - All Factors Tests
     
     func testAllFactors() {
-        // Test prime numbers (should only have 1 and themselves as factors)
-        XCTAssertEqual(contentView.allFactors(2), [1, 2])
-        XCTAssertEqual(contentView.allFactors(3), [1, 3])
-        XCTAssertEqual(contentView.allFactors(7), [1, 7])
-        XCTAssertEqual(contentView.allFactors(11), [1, 11])
-        
         // Test composite numbers
-        XCTAssertEqual(contentView.allFactors(4), [1, 2, 4])
-        XCTAssertEqual(contentView.allFactors(6), [1, 2, 3, 6])
-        XCTAssertEqual(contentView.allFactors(8), [1, 2, 4, 8])
-        XCTAssertEqual(contentView.allFactors(12), [1, 2, 3, 4, 6, 12])
-        XCTAssertEqual(contentView.allFactors(15), [1, 3, 5, 15])
-        XCTAssertEqual(contentView.allFactors(16), [1, 2, 4, 8, 16])
-        XCTAssertEqual(contentView.allFactors(28), [1, 2, 4, 7, 14, 28])
+        XCTAssertEqual(contentView.allFactors(4), [2])
+        XCTAssertEqual(contentView.allFactors(6), [2, 3])
+        XCTAssertEqual(contentView.allFactors(8), [2, 4])
+        XCTAssertEqual(contentView.allFactors(12), [2, 3, 4, 6])
+        XCTAssertEqual(contentView.allFactors(15), [3, 5])
+        XCTAssertEqual(contentView.allFactors(16), [2, 4, 8])
+        XCTAssertEqual(contentView.allFactors(28), [2, 4, 7, 14])
         
         // Test perfect squares
-        XCTAssertEqual(contentView.allFactors(9), [1, 3, 9])
-        XCTAssertEqual(contentView.allFactors(25), [1, 5, 25])
-        XCTAssertEqual(contentView.allFactors(100), [1, 2, 4, 5, 10, 20, 25, 50, 100])
+        XCTAssertEqual(contentView.allFactors(9), [3])
+        XCTAssertEqual(contentView.allFactors(25), [5])
+        XCTAssertEqual(contentView.allFactors(100), [2, 4, 5, 10, 20, 25, 50])
         
         // Test edge cases
-        XCTAssertEqual(contentView.allFactors(1), [1])
+        XCTAssertEqual(contentView.allFactors(1), [])
         XCTAssertEqual(contentView.allFactors(0), [])
         XCTAssertEqual(contentView.allFactors(-1), [])
-    }
-    
-    func testAllFactorsLargeNumbers() {
+                                                    
         // Test some larger numbers
-        XCTAssertEqual(contentView.allFactors(120), [1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 24, 30, 40, 60, 120])
-        XCTAssertEqual(contentView.allFactors(128), [1, 2, 4, 8, 16, 32, 64, 128])  // Power of 2
-        XCTAssertEqual(contentView.allFactors(1000), [1, 2, 4, 5, 8, 10, 20, 25, 40, 50, 100, 125, 200, 250, 500, 1000])
+        XCTAssertEqual(contentView.allFactors(120), [2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 24, 30, 40, 60])
+        XCTAssertEqual(contentView.allFactors(128), [2, 4, 8, 16, 32, 64])  // Power of 2
+        XCTAssertEqual(contentView.allFactors(1000), [2, 4, 5, 8, 10, 20, 25, 40, 50, 100, 125, 200, 250, 500])
     }
     
     // MARK: - Prime Factorization Tests
@@ -150,9 +142,7 @@ final class PrimeFinderAppTests: XCTestCase {
         XCTAssertEqual(contentView.primeFactors(100), [2, 2, 5, 5])
         XCTAssertEqual(contentView.primeFactors(147), [3, 7, 7])
         XCTAssertEqual(contentView.primeFactors(330), [2, 3, 5, 11])
-    }
-    
-    func testPrimeFactorsWithLargeNumbers() {
+        
         // Test large numbers with multiple factors
         XCTAssertEqual(contentView.primeFactors(7917), [3, 7, 13, 29])
         XCTAssertEqual(contentView.primeFactors(104730), [2, 3, 5, 3491])

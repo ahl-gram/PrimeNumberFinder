@@ -414,7 +414,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				"INFOPLIST_FILE[sdk=*]" = PrimeFinderApp/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Prime Number Finder";
+				INFOPLIST_KEY_CFBundleDisplayName = "Prime Finder";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UIRequiredDeviceCapabilities = armv7;
@@ -449,7 +449,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				"INFOPLIST_FILE[sdk=*]" = PrimeFinderApp/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Prime Number Finder";
+				INFOPLIST_KEY_CFBundleDisplayName = "Prime Finder";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UIRequiredDeviceCapabilities = armv7;
