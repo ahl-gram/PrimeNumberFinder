@@ -189,7 +189,7 @@ struct ContentView: View {
             } else {
                 let factors = primeFactors(number)
                 let formattedFactors = factors.map { NumberFormatter.localizedString(from: NSNumber(value: $0), number: .decimal) }
-                result = "🔹 \(formattedNumber) is not a prime number.\nPrime factors: \(formattedFactors.joined(separator: " × "))"
+                result = "☑️ \(formattedNumber) is not a prime number.\nPrime factors: \(formattedFactors.joined(separator: " × "))"
             }
         }
         addToHistory(number: number, result: result)
@@ -390,7 +390,7 @@ struct ContentView: View {
                                                    ? primaryColor
                                                    : .red)
                                 Spacer()
-                                if !result.contains("Please enter") {
+                                if result.contains("is not a prime") {
                                     Image(systemName: isResultExpanded ? "chevron.up.circle.fill" : "chevron.down.circle.fill")
                                         .foregroundColor(result.contains("is a prime")
                                                        ? .green
@@ -633,7 +633,7 @@ struct ContentView: View {
                     FeatureRow(icon: "plus.circle.fill", title: "Increment/Decrement", description: "Use + and - buttons to check nearby numbers")
                     FeatureRow(icon: "arrowtriangle.right.circle.fill", title: "Prime Navigation", description: "Use arrow buttons to find the next or previous prime number")
                     FeatureRow(icon: "chevron.down.circle.fill", title: "Interactive Results", description: "Tap on results to view additional information and all factors for composite numbers")
-                    FeatureRow(icon: "number.circle", title: "Interactive Factors", description: "Tap on any factor to instantly check if it's prime")
+                    FeatureRow(icon: "number.circle", title: "Interactive Factors", description: "Tap on any factor in the list to instantly check if it's prime")
                     FeatureRow(icon: "clock.arrow.circlepath", title: "History", description: "View your previous number checks")
                 }
                 .padding(.vertical, 4)
@@ -642,7 +642,7 @@ struct ContentView: View {
             Section(header: Text("Tips")) {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("• Numbers are limited to 10 digits to prevent overflow")
-                    Text("• Clear the input field using the X button")
+                    Text("• Clear the input field using the 🅧 button")
                     Text("• Tap anywhere to dismiss the keyboard")
                     Text("• Green results indicate prime numbers")
                     Text("• Blue results indicate composite numbers")
