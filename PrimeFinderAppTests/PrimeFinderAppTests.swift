@@ -9,15 +9,106 @@ import XCTest
 import SwiftUI
 @testable import PrimeFinderApp
 
+// Mock class for testing button actions
+class MockContentView {
+    var inputNumber: String = ""
+    var result: String = ""
+    var history: [HistoryItem] = []
+    
+    // Track function calls
+    var validateAndProcessInputCalled = false
+    var findNextPrimeCalled = false
+    var findPreviousPrimeCalled = false
+    var incrementCalled = false
+    var decrementCalled = false
+    
+    // Simulate button actions
+    func incrementNumber() {
+        if let number = Int(inputNumber) {
+            inputNumber = String(number + 1)
+            incrementCalled = true
+            validateAndProcessInput()
+        }
+    }
+    
+    func decrementNumber() {
+        if let number = Int(inputNumber), number > 1 {
+            inputNumber = String(number - 1)
+            decrementCalled = true
+            validateAndProcessInput()
+        }
+    }
+    
+    func findNextPrime() {
+        if let number = Int(inputNumber),
+           let nextPrime = PrimeFinderUtils.findNextPrime(number) {
+            inputNumber = String(nextPrime)
+            findNextPrimeCalled = true
+            validateAndProcessInput()
+        }
+    }
+    
+    func findPreviousPrime() {
+        if let number = Int(inputNumber),
+           let previousPrime = PrimeFinderUtils.findPreviousPrime(number) {
+            inputNumber = String(previousPrime)
+            findPreviousPrimeCalled = true
+            validateAndProcessInput()
+        }
+    }
+    
+    func validateAndProcessInput() {
+        validateAndProcessInputCalled = true
+        
+        guard PrimeFinderUtils.isValidInput(inputNumber) else {
+            result = "Please enter a valid positive integer."
+            return
+        }
+        
+        guard let number = Int(inputNumber) else { return }
+        
+        // Format number with thousands separator
+        let formattedNumber = NumberFormatter.localizedString(from: NSNumber(value: number), number: .decimal)
+        
+        if number == 1 {
+            result = "\(formattedNumber) is defined as not a prime."
+        }
+        else {
+            if PrimeFinderUtils.isPrime(number) {
+                result = "✅ \(formattedNumber) is a prime number."
+            } else {
+                let factors = PrimeFinderUtils.primeFactors(number)
+                let formattedFactors = factors.map { NumberFormatter.localizedString(from: NSNumber(value: $0), number: .decimal) }
+                result = "☑️ \(formattedNumber) is not a prime number.\nPrime factors: \(formattedFactors.joined(separator: " × "))"
+            }
+        }
+        
+        let historyItem = HistoryItem(number: number, result: result, timestamp: Date())
+        history.insert(historyItem, at: 0)
+    }
+    
+    // Reset tracking variables
+    func resetTracking() {
+        validateAndProcessInputCalled = false
+        findNextPrimeCalled = false
+        findPreviousPrimeCalled = false
+        incrementCalled = false
+        decrementCalled = false
+    }
+}
+
 final class PrimeFinderAppTests: XCTestCase {
     var contentView: ContentView!
+    var mockContentView: MockContentView!
     
     override func setUpWithError() throws {
         contentView = ContentView()
+        mockContentView = MockContentView()
     }
     
     override func tearDownWithError() throws {
         contentView = nil
+        mockContentView = nil
     }
     
     // MARK: - Input Validation Tests
@@ -196,10 +287,6 @@ final class PrimeFinderAppTests: XCTestCase {
     
     // MARK: - UI Interaction Tests
     
-    private func clearHistory() {
-        contentView.history = []
-    }
-    
     func testKeyboardDismissal() {
         // Test keyboard dismissal sets focus state
         contentView.isInputFocused = true
@@ -210,5 +297,73 @@ final class PrimeFinderAppTests: XCTestCase {
         contentView.isInputFocused = true
         contentView.validateAndProcessInput()
         XCTAssertFalse(contentView.isInputFocused)
+    }
+    
+    // MARK: - Button Functionality Tests
+    
+    func testIncrementDecrementButtons() {
+        // Test increment button
+        mockContentView.inputNumber = "42"
+        mockContentView.resetTracking()
+        
+        // Call the method that simulates pressing the plus button
+        mockContentView.incrementNumber()
+        
+        XCTAssertTrue(mockContentView.incrementCalled, "Increment function should be called")
+        XCTAssertTrue(mockContentView.validateAndProcessInputCalled, "validateAndProcessInput should be called")
+        XCTAssertEqual(mockContentView.inputNumber, "43", "Input number should be incremented")
+        XCTAssertTrue(mockContentView.result.contains("43"), "Result should contain the new number")
+        
+        // Test decrement button
+        mockContentView.resetTracking()
+        mockContentView.decrementNumber()
+        
+        XCTAssertTrue(mockContentView.decrementCalled, "Decrement function should be called")
+        XCTAssertTrue(mockContentView.validateAndProcessInputCalled, "validateAndProcessInput should be called")
+        XCTAssertEqual(mockContentView.inputNumber, "42", "Input number should be decremented")
+        XCTAssertTrue(mockContentView.result.contains("42"), "Result should contain the new number")
+        
+        // Test edge case: decrementing 1 should not work
+        mockContentView.inputNumber = "1"
+        mockContentView.resetTracking()
+        mockContentView.decrementNumber()
+        
+        XCTAssertFalse(mockContentView.decrementCalled, "Decrement function should not be called for 1")
+        XCTAssertFalse(mockContentView.validateAndProcessInputCalled, "validateAndProcessInput should not be called")
+        XCTAssertEqual(mockContentView.inputNumber, "1", "Input number should remain unchanged")
+    }
+    
+    func testPrimeNavigationButtons() {
+        // Test next prime button
+        mockContentView.inputNumber = "10"
+        mockContentView.resetTracking()
+        
+        // Call the method that simulates pressing the next prime button
+        mockContentView.findNextPrime()
+        
+        XCTAssertTrue(mockContentView.findNextPrimeCalled, "findNextPrime function should be called")
+        XCTAssertTrue(mockContentView.validateAndProcessInputCalled, "validateAndProcessInput should be called")
+        XCTAssertEqual(mockContentView.inputNumber, "11", "Input number should be updated to next prime")
+        XCTAssertTrue(mockContentView.result.contains("11"), "Result should contain the new prime number")
+        XCTAssertTrue(mockContentView.result.contains("is a prime"), "Result should indicate the number is prime")
+        
+        // Test previous prime button
+        mockContentView.resetTracking()
+        mockContentView.findPreviousPrime()
+        
+        XCTAssertTrue(mockContentView.findPreviousPrimeCalled, "findPreviousPrime function should be called")
+        XCTAssertTrue(mockContentView.validateAndProcessInputCalled, "validateAndProcessInput should be called")
+        XCTAssertEqual(mockContentView.inputNumber, "7", "Input number should be updated to previous prime")
+        XCTAssertTrue(mockContentView.result.contains("7"), "Result should contain the new prime number")
+        XCTAssertTrue(mockContentView.result.contains("is a prime"), "Result should indicate the number is prime")
+        
+        // Test edge case: finding previous prime from 2 should not work
+        mockContentView.inputNumber = "2"
+        mockContentView.resetTracking()
+        mockContentView.findPreviousPrime()
+        
+        XCTAssertFalse(mockContentView.findPreviousPrimeCalled, "findPreviousPrime function should not be called for 2")
+        XCTAssertFalse(mockContentView.validateAndProcessInputCalled, "validateAndProcessInput should not be called")
+        XCTAssertEqual(mockContentView.inputNumber, "2", "Input number should remain unchanged")
     }
 }
