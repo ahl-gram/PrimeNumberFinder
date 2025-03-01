@@ -29,7 +29,7 @@ struct ContentView: View {
     
     // MARK: - Constants
     let maxInputLength = 10 // Prevent integer overflow
-    let maxNumberInput = 9999999999
+    let maxNumberInput = PrimeFinderUtils.maxNumberInput
     
     // External URLs
     let wikipediaURL = "https://en.wikipedia.org/wiki/Prime_number"
@@ -48,133 +48,6 @@ struct ContentView: View {
         UIImpactFeedbackGenerator(style: .light).impactOccurred()
     }
     
-    // MARK: - Validation and Calculation Functions
-    func isValidInput(_ input: String) -> Bool {
-        guard let number = Int(input) else { return false }
-        return number > 0
-    }
-    
-    func isMersennePrime(_ number: Int) -> Bool {
-        // A Mersenne prime is a prime number of the form 2^n - 1
-        // First check if the number is prime
-        if !isPrime(number) {
-            return false
-        }
-        
-        // Check if the number is one less than a power of 2
-        let numberPlusOne = number + 1
-        
-        // If it's a power of 2, it will have exactly one bit set
-        // Using bitwise AND to check: (n & (n-1)) == 0
-        return (numberPlusOne & (numberPlusOne - 1)) == 0
-    }
-    
-    func allFactors(_ number: Int) -> [Int] {
-        // Return empty array for invalid inputs
-        if number < 1 {
-            return []
-        }
-        
-        // 1 only has itself as a factor
-        if number == 1 {
-            return []
-        }
-        
-        var factors = Set<Int>() // Use Set to avoid duplicates
-        
-        // Find factors up to the square root
-        let sqrtNum = Int(Double(number).squareRoot())
-        for i in 2...sqrtNum {  // Start from 2 to exclude 1
-            if number % i == 0 {
-                factors.insert(i)
-                let pair = number / i
-                if pair != i && pair != number {  // Exclude the number itself
-                    factors.insert(pair)
-                }
-            }
-        }
-        
-        // Convert to array and sort
-        return Array(factors).sorted()
-    }
-    
-    func isPrime(_ number: Int) -> Bool {
-        if number < 2 { return false }
-        if number == 2 || number == 3 { return true }
-        if number % 2 == 0 || number % 3 == 0 { return false }
-        
-        // Precompute the square root of the number.
-        /* If number has a factor greater than its square root, it must also have a corresponding factor smaller than its square root. Therefore, it's sufficient to check for factors up to the square root of number.
-        */
-        let limit = Int(Double(number).squareRoot())
-        
-        // Loop through potential factors starting at 5 using the 6k ± 1 optimization
-        var i = 5
-        while i <= limit {
-            if number % i == 0 {
-                // 6k - 1 is a divisor, so number is composite
-                return false
-            }
-            
-            if number % (i + 2) == 0 {
-                // 6k + 1 is a divisor, so number is composite
-                return false
-            }
-            
-            // Move to the next potential set of divisors (6k ± 1)
-            i += 6
-        }
-        
-        // If no divisors are found, number is prime
-        return true
-    }
-    
-    func findNextPrime(_ from: Int) -> Int? {
-        var current = from + 1
-        // Prevent integer overflow
-        while current <= Int.max && current <= maxNumberInput {
-            if isPrime(current) {
-                return current
-            }
-            current += 1
-        }
-        return nil
-    }
-    
-    func findPreviousPrime(_ from: Int) -> Int? {
-        var current = from - 1
-        while current >= 2 {
-            if isPrime(current) {
-                return current
-            }
-            current -= 1
-        }
-        return nil
-    }
-    
-    func primeFactors(_ number: Int) -> [Int] {
-        var n = number
-        var factors: [Int] = []
-        var divisor = 2
-        
-        while n >= 2 {
-            while n % divisor == 0 {
-                factors.append(divisor)
-                n /= divisor
-            }
-            divisor += (divisor == 2) ? 1 : 2
-            
-            if divisor * divisor > n {
-                if n > 1 {
-                    factors.append(n)
-                }
-                break
-            }
-        }
-        
-        return factors
-    }
-    
     func addToHistory(number: Int, result: String) {
         let historyItem = HistoryItem(number: number, result: result, timestamp: Date())
         history.insert(historyItem, at: 0) // Add to beginning of array
@@ -183,7 +56,7 @@ struct ContentView: View {
     func validateAndProcessInput() {
         dismissKeyboard()
         
-        guard isValidInput(inputNumber) else {
+        guard PrimeFinderUtils.isValidInput(inputNumber) else {
             result = "Please enter a valid positive integer."
             UINotificationFeedbackGenerator().notificationOccurred(.error)
             return
@@ -201,10 +74,10 @@ struct ContentView: View {
             result = "\(formattedNumber) is defined as not a prime."
         }
         else {
-            if isPrime(number) {
+            if PrimeFinderUtils.isPrime(number) {
                 result = "✅ \(formattedNumber) is a prime number."
             } else {
-                let factors = primeFactors(number)
+                let factors = PrimeFinderUtils.primeFactors(number)
                 let formattedFactors = factors.map { NumberFormatter.localizedString(from: NSNumber(value: $0), number: .decimal) }
                 result = "☑️ \(formattedNumber) is not a prime number.\nPrime factors: \(formattedFactors.joined(separator: " × "))"
             }
@@ -281,7 +154,7 @@ struct ContentView: View {
             // Left Arrow Button
             Button(action: {
                 if let number = Int(inputNumber),
-                   let previousPrime = findPreviousPrime(number) {
+                   let previousPrime = PrimeFinderUtils.findPreviousPrime(number) {
                     inputNumber = String(previousPrime)
                     UINotificationFeedbackGenerator().notificationOccurred(.success)
                     validateAndProcessInput()
@@ -363,7 +236,7 @@ struct ContentView: View {
             // Right Arrow Button
             Button(action: {
                 if let number = Int(inputNumber),
-                   let nextPrime = findNextPrime(number) {
+                   let nextPrime = PrimeFinderUtils.findNextPrime(number) {
                     inputNumber = String(nextPrime)
                     UINotificationFeedbackGenerator().notificationOccurred(.success)
                     validateAndProcessInput()
@@ -433,46 +306,48 @@ struct ContentView: View {
                 .buttonStyle(PlainButtonStyle())
                 .frame(maxWidth: .infinity)
                 
-                if isResultExpanded, let number = Int(inputNumber), !isPrime(number), number > 1 {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("🔢 All Factors")
-                            .font(.headline)
-                            .foregroundColor(primaryColor)
-                        
-                        let factors = allFactors(number).sorted()
-                        VStack(alignment: .leading, spacing: 8) {
-                            ForEach(Array(factors.enumerated()), id: \.element) { index, factor in
-                                HStack(spacing: 12) {
-                                    Text("\(index + 1).")
-                                        .font(.body)
-                                        .foregroundColor(.gray)
-                                    Button(action: {
-                                        inputNumber = String(factor)
-                                        validateAndProcessInput()
-                                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                                    }) {
-                                        Text("\(factor)")
-                                            .font(.system(.body, design: .monospaced))
-                                            .padding(.vertical, 8)
-                                            .padding(.horizontal, 12)
-                                            .background(
-                                                RoundedRectangle(cornerRadius: 8)
-                                                    .fill(primaryColor.opacity(0.1))
-                                            )
-                                            .foregroundColor(primaryColor)
+                if isResultExpanded {
+                    if let number = Int(inputNumber), !PrimeFinderUtils.isPrime(number), number > 1 {
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("🔢 All Factors")
+                                .font(.headline)
+                                .foregroundColor(primaryColor)
+                            
+                            let factors = PrimeFinderUtils.allFactors(number).sorted()
+                            VStack(alignment: .leading, spacing: 8) {
+                                ForEach(Array(factors.enumerated()), id: \.element) { index, factor in
+                                    HStack(spacing: 12) {
+                                        Text("\(index + 1).")
+                                            .font(.body)
+                                            .foregroundColor(.gray)
+                                        Button(action: {
+                                            inputNumber = String(factor)
+                                            validateAndProcessInput()
+                                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                                        }) {
+                                            Text("\(factor)")
+                                                .font(.system(.body, design: .monospaced))
+                                                .padding(.vertical, 8)
+                                                .padding(.horizontal, 12)
+                                                .background(
+                                                    RoundedRectangle(cornerRadius: 8)
+                                                        .fill(primaryColor.opacity(0.1))
+                                                )
+                                                .foregroundColor(primaryColor)
+                                        }
                                     }
                                 }
                             }
                         }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color(.systemGray6))
+                        )
+                        .padding(.top, 4)
+                        .transition(.move(edge: .top).combined(with: .opacity))
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color(.systemGray6))
-                    )
-                    .padding(.top, 4)
-                    .transition(.move(edge: .top).combined(with: .opacity))
                 }
             }
         }
@@ -695,7 +570,9 @@ struct ContentView: View {
                     checkButton
                     
                     ScrollView {
-                        resultView
+                        VStack {
+                            resultView
+                        }
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .cornerRadius(12)
