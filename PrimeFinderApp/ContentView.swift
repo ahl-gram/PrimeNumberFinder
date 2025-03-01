@@ -26,6 +26,8 @@ struct ContentView: View {
     @State private var showingFactorAlert = false
     @State private var selectedFactor: Int = 0
     @FocusState internal var isInputFocused: Bool
+    @State private var isUserTyping = true
+    @State private var isProgrammaticChange = false // Track if change is from a button
     
     // MARK: - Constants
     let maxInputLength = 10 // Prevent integer overflow
@@ -105,6 +107,14 @@ struct ContentView: View {
             }
             .accessibilityLabel("Input Number Field")
             .onChange(of: inputNumber) { newValue in
+                // Only set isUserTyping to true if this is not a programmatic change
+                if !isProgrammaticChange {
+                    isUserTyping = true
+                } else {
+                    // Reset the flag for the next change
+                    isProgrammaticChange = false
+                }
+                
                 let filtered = newValue.filter { "0123456789".contains($0) }
                 
                 // Provide haptic feedback if input was filtered
@@ -125,6 +135,14 @@ struct ContentView: View {
                 } else {
                     inputNumber = processedInput
                 }
+                
+                // Clear result only when user is directly typing
+                if isUserTyping && !result.isEmpty {
+                    result = ""
+                    if isResultExpanded {
+                        isResultExpanded = false
+                    }
+                }
             }
             .overlay(
                 Group {
@@ -132,6 +150,9 @@ struct ContentView: View {
                         HStack {
                             Spacer()
                             Button(action: {
+                                // This is a direct user action, so set isUserTyping to true
+                                isUserTyping = true
+                                isProgrammaticChange = true
                                 inputNumber = ""
                                 result = ""
                                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
@@ -153,6 +174,10 @@ struct ContentView: View {
         HStack(spacing: 10) {
             // Left Arrow Button
             Button(action: {
+                // Set flags to indicate this is not direct user typing
+                isUserTyping = false
+                isProgrammaticChange = true
+                
                 if let number = Int(inputNumber),
                    let previousPrime = PrimeFinderUtils.findPreviousPrime(number) {
                     inputNumber = String(previousPrime)
@@ -176,6 +201,10 @@ struct ContentView: View {
 
             // Minus Button
             Button(action: {
+                // Set flags to indicate this is not direct user typing
+                isUserTyping = false
+                isProgrammaticChange = true
+                
                 if let number = Int(inputNumber) {
                     inputNumber = String(number - 1)
                     validateAndProcessInput()
@@ -216,6 +245,10 @@ struct ContentView: View {
 
             // Plus Button
             Button(action: {
+                // Set flags to indicate this is not direct user typing
+                isUserTyping = false
+                isProgrammaticChange = true
+                
                 if let number = Int(inputNumber) {
                     inputNumber = String(number + 1)
                     validateAndProcessInput()
@@ -235,6 +268,10 @@ struct ContentView: View {
 
             // Right Arrow Button
             Button(action: {
+                // Set flags to indicate this is not direct user typing
+                isUserTyping = false
+                isProgrammaticChange = true
+                
                 if let number = Int(inputNumber),
                    let nextPrime = PrimeFinderUtils.findNextPrime(number) {
                     inputNumber = String(nextPrime)
@@ -321,6 +358,8 @@ struct ContentView: View {
                                             .font(.body)
                                             .foregroundColor(.gray)
                                         Button(action: {
+                                            isUserTyping = false
+                                            isProgrammaticChange = true
                                             inputNumber = String(factor)
                                             validateAndProcessInput()
                                             UIImpactFeedbackGenerator(style: .light).impactOccurred()

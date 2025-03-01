@@ -14,6 +14,8 @@ class MockContentView {
     var inputNumber: String = ""
     var result: String = ""
     var history: [HistoryItem] = []
+    var isUserTyping: Bool = true
+    var isProgrammaticChange: Bool = false
     
     // Track function calls
     var validateAndProcessInputCalled = false
@@ -25,6 +27,8 @@ class MockContentView {
     // Simulate button actions
     func incrementNumber() {
         if let number = Int(inputNumber) {
+            isUserTyping = false
+            isProgrammaticChange = true
             inputNumber = String(number + 1)
             incrementCalled = true
             validateAndProcessInput()
@@ -33,6 +37,8 @@ class MockContentView {
     
     func decrementNumber() {
         if let number = Int(inputNumber), number > 1 {
+            isUserTyping = false
+            isProgrammaticChange = true
             inputNumber = String(number - 1)
             decrementCalled = true
             validateAndProcessInput()
@@ -42,6 +48,8 @@ class MockContentView {
     func findNextPrime() {
         if let number = Int(inputNumber),
            let nextPrime = PrimeFinderUtils.findNextPrime(number) {
+            isUserTyping = false
+            isProgrammaticChange = true
             inputNumber = String(nextPrime)
             findNextPrimeCalled = true
             validateAndProcessInput()
@@ -51,9 +59,30 @@ class MockContentView {
     func findPreviousPrime() {
         if let number = Int(inputNumber),
            let previousPrime = PrimeFinderUtils.findPreviousPrime(number) {
+            isUserTyping = false
+            isProgrammaticChange = true
             inputNumber = String(previousPrime)
             findPreviousPrimeCalled = true
             validateAndProcessInput()
+        }
+    }
+    
+    // Simulate user typing in the input field
+    func simulateInputChange(to newValue: String, isUserTyping: Bool = true) {
+        // Always set isUserTyping to true by default, just like the real onChange handler
+        self.isUserTyping = isUserTyping
+        
+        // Set isProgrammaticChange based on isUserTyping
+        self.isProgrammaticChange = !isUserTyping
+        
+        inputNumber = newValue
+        
+        // Reset isProgrammaticChange after the change
+        self.isProgrammaticChange = false
+        
+        // Clear result if user is typing and there's a result
+        if self.isUserTyping && !result.isEmpty {
+            result = ""
         }
     }
     
@@ -365,5 +394,63 @@ final class PrimeFinderAppTests: XCTestCase {
         XCTAssertFalse(mockContentView.findPreviousPrimeCalled, "findPreviousPrime function should not be called for 2")
         XCTAssertFalse(mockContentView.validateAndProcessInputCalled, "validateAndProcessInput should not be called")
         XCTAssertEqual(mockContentView.inputNumber, "2", "Input number should remain unchanged")
+    }
+    
+    // MARK: - Input Modification Tests
+    
+    func testInputModificationClearsResult() {
+        // Setup
+        mockContentView.inputNumber = "10"
+        mockContentView.validateAndProcessInput()
+        XCTAssertFalse(mockContentView.result.isEmpty, "Result should not be empty after validation")
+        
+        // Test 1: Direct user typing should clear the result
+        mockContentView.simulateInputChange(to: "11", isUserTyping: true)
+        XCTAssertTrue(mockContentView.result.isEmpty, "Result should be cleared when user is typing")
+        
+        // Setup again
+        mockContentView.inputNumber = "10"
+        mockContentView.validateAndProcessInput()
+        XCTAssertFalse(mockContentView.result.isEmpty, "Result should not be empty after validation")
+        
+        // Test 2: Button actions should not clear the result
+        mockContentView.simulateInputChange(to: "11", isUserTyping: false)
+        XCTAssertFalse(mockContentView.result.isEmpty, "Result should not be cleared when using buttons")
+        
+        // Test 3: Increment button should not clear the result
+        mockContentView.inputNumber = "10"
+        mockContentView.validateAndProcessInput()
+        mockContentView.incrementNumber()
+        XCTAssertFalse(mockContentView.result.isEmpty, "Result should not be cleared when using increment button")
+        
+        // Test 4: Next prime button should not clear the result
+        mockContentView.inputNumber = "10"
+        mockContentView.validateAndProcessInput()
+        mockContentView.findNextPrime()
+        XCTAssertFalse(mockContentView.result.isEmpty, "Result should not be cleared when using next prime button")
+    }
+    
+    func testInputModificationAfterButtonAction() {
+        // Setup - use a button action first
+        mockContentView.inputNumber = "10"
+        mockContentView.validateAndProcessInput()
+        
+        // Before button action, isProgrammaticChange should be false
+        XCTAssertFalse(mockContentView.isProgrammaticChange, "isProgrammaticChange should be false initially")
+        
+        mockContentView.incrementNumber()
+        
+        // Verify isUserTyping was set to false by the button action
+        XCTAssertFalse(mockContentView.isUserTyping, "isUserTyping should be false after button action")
+        XCTAssertTrue(mockContentView.isProgrammaticChange, "isProgrammaticChange should be reset to true after button action")
+        XCTAssertFalse(mockContentView.result.isEmpty, "Result should not be empty after button action")
+        
+        // Now simulate user typing after the button action
+        mockContentView.simulateInputChange(to: "12", isUserTyping: true)
+        
+        // Verify result was cleared
+        XCTAssertTrue(mockContentView.isUserTyping, "isUserTyping should be true after user typing")
+        XCTAssertFalse(mockContentView.isProgrammaticChange, "isProgrammaticChange should be false after user typing")
+        XCTAssertTrue(mockContentView.result.isEmpty, "Result should be cleared when user types after button action")
     }
 }
