@@ -24,10 +24,9 @@ struct ContentView: View {
     @State internal var isResultExpanded = false
     @State private var editMode = EditMode.inactive
     @State private var showingFactorAlert = false
-    @State private var selectedFactor: Int = 0
     @FocusState internal var isInputFocused: Bool
     @State private var isUserTyping = true
-    @State private var isProgrammaticChange = false // Track if change is from a button
+    @State private var isButtonChange = false // Track if change is from a button
     
     // MARK: - Constants
     let maxInputLength = 10 // Prevent integer overflow
@@ -108,11 +107,11 @@ struct ContentView: View {
             .accessibilityLabel("Input Number Field")
             .onChange(of: inputNumber) { newValue in
                 // Only set isUserTyping to true if this is not a programmatic change
-                if !isProgrammaticChange {
-                    isUserTyping = true
-                } else {
+                if isButtonChange {
                     // Reset the flag for the next change
-                    isProgrammaticChange = false
+                    isButtonChange = false
+                } else {
+                    isUserTyping = true
                 }
                 
                 let filtered = newValue.filter { "0123456789".contains($0) }
@@ -152,7 +151,7 @@ struct ContentView: View {
                             Button(action: {
                                 // This is a direct user action, so set isUserTyping to true
                                 isUserTyping = true
-                                isProgrammaticChange = true
+                                isButtonChange = true
                                 inputNumber = ""
                                 result = ""
                                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
@@ -176,7 +175,7 @@ struct ContentView: View {
             Button(action: {
                 // Set flags to indicate this is not direct user typing
                 isUserTyping = false
-                isProgrammaticChange = true
+                isButtonChange = true
                 
                 if let number = Int(inputNumber),
                    let previousPrime = PrimeFinderUtils.findPreviousPrime(number) {
@@ -203,7 +202,7 @@ struct ContentView: View {
             Button(action: {
                 // Set flags to indicate this is not direct user typing
                 isUserTyping = false
-                isProgrammaticChange = true
+                isButtonChange = true
                 
                 if let number = Int(inputNumber) {
                     inputNumber = String(number - 1)
@@ -247,7 +246,7 @@ struct ContentView: View {
             Button(action: {
                 // Set flags to indicate this is not direct user typing
                 isUserTyping = false
-                isProgrammaticChange = true
+                isButtonChange = true
                 
                 if let number = Int(inputNumber) {
                     inputNumber = String(number + 1)
@@ -270,7 +269,7 @@ struct ContentView: View {
             Button(action: {
                 // Set flags to indicate this is not direct user typing
                 isUserTyping = false
-                isProgrammaticChange = true
+                isButtonChange = true
                 
                 if let number = Int(inputNumber),
                    let nextPrime = PrimeFinderUtils.findNextPrime(number) {
@@ -359,7 +358,7 @@ struct ContentView: View {
                                             .foregroundColor(.gray)
                                         Button(action: {
                                             isUserTyping = false
-                                            isProgrammaticChange = true
+                                            isButtonChange = true
                                             inputNumber = String(factor)
                                             validateAndProcessInput()
                                             UIImpactFeedbackGenerator(style: .light).impactOccurred()
