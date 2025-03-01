@@ -50,6 +50,22 @@ final class PrimeFinderAppTests: XCTestCase {
         XCTAssertTrue(contentView.isPrime(19))
         XCTAssertTrue(contentView.isPrime(23))
         XCTAssertTrue(contentView.isPrime(97))
+        XCTAssertTrue(contentView.isPrime(101))
+        XCTAssertTrue(contentView.isPrime(103))
+        XCTAssertTrue(contentView.isPrime(107))
+        XCTAssertTrue(contentView.isPrime(109))
+        XCTAssertTrue(contentView.isPrime(149))
+        XCTAssertTrue(contentView.isPrime(151))
+        XCTAssertTrue(contentView.isPrime(3019))
+        XCTAssertTrue(contentView.isPrime(3037))
+        XCTAssertTrue(contentView.isPrime(7919))  // 1000th prime number
+        XCTAssertTrue(contentView.isPrime(104729)) // 10000th prime number
+        XCTAssertTrue(contentView.isPrime(1000151))
+        XCTAssertTrue(contentView.isPrime(20000003))
+        XCTAssertTrue(contentView.isPrime(1000000007))
+        XCTAssertTrue(contentView.isPrime(1000000009))
+        
+        
         
         // Test non-prime numbers
         XCTAssertFalse(contentView.isPrime(1))
@@ -60,18 +76,19 @@ final class PrimeFinderAppTests: XCTestCase {
         XCTAssertFalse(contentView.isPrime(10))
         XCTAssertFalse(contentView.isPrime(12))
         XCTAssertFalse(contentView.isPrime(15))
+        XCTAssertFalse(contentView.isPrime(51))
         XCTAssertFalse(contentView.isPrime(100))
-    }
-    
-    func testIsPrimeWithLargeNumbers() {
-        // Test large prime numbers
-        XCTAssertTrue(contentView.isPrime(7919))  // 1000th prime number
-        XCTAssertTrue(contentView.isPrime(104729)) // 10000th prime number
-        
-        // Test large composite numbers
         XCTAssertFalse(contentView.isPrime(7917)) // 7917 = 3 × 2639
         XCTAssertFalse(contentView.isPrime(104730)) // 104730 = 2 × 52365
+        XCTAssertFalse(contentView.isPrime(1000001))
+        XCTAssertFalse(contentView.isPrime(1000002))
+        XCTAssertFalse(contentView.isPrime(1000006))
+        XCTAssertFalse(contentView.isPrime(1000129))
+        XCTAssertFalse(contentView.isPrime(1000137))
+        XCTAssertFalse(contentView.isPrime(1000000000))
+        XCTAssertFalse(contentView.isPrime(1000000011))
     }
+
     
     // MARK: - Mersenne Prime Tests
     

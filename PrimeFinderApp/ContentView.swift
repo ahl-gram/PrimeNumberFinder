@@ -29,6 +29,7 @@ struct ContentView: View {
     
     // MARK: - Constants
     let maxInputLength = 10 // Prevent integer overflow
+    let maxNumberInput = 9999999999
     
     // External URLs
     let wikipediaURL = "https://en.wikipedia.org/wiki/Prime_number"
@@ -102,20 +103,36 @@ struct ContentView: View {
         if number == 2 || number == 3 { return true }
         if number % 2 == 0 || number % 3 == 0 { return false }
         
+        // Precompute the square root of the number.
+        /* If number has a factor greater than its square root, it must also have a corresponding factor smaller than its square root. Therefore, it's sufficient to check for factors up to the square root of number.
+        */
+        let limit = Int(Double(number).squareRoot())
+        
+        // Loop through potential factors starting at 5 using the 6k ± 1 optimization
         var i = 5
-        while i * i <= number {
-            if number % i == 0 || number % (i + 2) == 0 {
+        while i <= limit {
+            if number % i == 0 {
+                // 6k - 1 is a divisor, so number is composite
                 return false
             }
+            
+            if number % (i + 2) == 0 {
+                // 6k + 1 is a divisor, so number is composite
+                return false
+            }
+            
+            // Move to the next potential set of divisors (6k ± 1)
             i += 6
         }
+        
+        // If no divisors are found, number is prime
         return true
     }
     
     func findNextPrime(_ from: Int) -> Int? {
         var current = from + 1
         // Prevent integer overflow
-        while current <= Int.max && current <= 9999999999 {
+        while current <= Int.max && current <= maxNumberInput {
             if isPrime(current) {
                 return current
             }
@@ -338,9 +355,9 @@ struct ContentView: View {
                     .background(primaryColor)
                     .cornerRadius(12)
                     .shadow(radius: 2)
-                    .opacity(inputNumber.isEmpty || inputNumber >= "9999999999" ? 0.5 : 1.0)
+                    .opacity(inputNumber.isEmpty || inputNumber >= String(maxNumberInput) ? 0.5 : 1.0)
             }
-            .disabled(inputNumber.isEmpty || inputNumber >= "9999999999")
+            .disabled(inputNumber.isEmpty || inputNumber >= String(maxNumberInput))
             .accessibilityLabel("Increment Number")
 
             // Right Arrow Button
@@ -361,9 +378,9 @@ struct ContentView: View {
                     .background(primaryColor)
                     .cornerRadius(12)
                     .shadow(radius: 2)
-                    .opacity(inputNumber.isEmpty || inputNumber >= "9999999999" ? 0.5 : 1.0)
+                    .opacity(inputNumber.isEmpty || inputNumber >= String(maxNumberInput) ? 0.5 : 1.0)
             }
-            .disabled(inputNumber.isEmpty || inputNumber >= "9999999999")
+            .disabled(inputNumber.isEmpty || inputNumber >= String(maxNumberInput))
             .accessibilityLabel("Next Prime")
         }
         .padding(.horizontal)
@@ -673,6 +690,7 @@ struct ContentView: View {
                 backgroundColor.ignoresSafeArea()
                 
                 VStack(spacing: 20) {
+                    //Text("Prime Number Finder").font(.largeTitle).bold()
                     inputField
                     checkButton
                     
