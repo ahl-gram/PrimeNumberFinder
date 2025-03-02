@@ -29,7 +29,7 @@ struct ContentView: View {
     @State private var isButtonChange = false // Track if change is from a button
     
     // MARK: - Constants
-    let maxInputLength = 19 // Prevent integer overflow
+    let maxInputLength = 13 // Prevent integer overflow
     let maxNumberInput = PrimeFinderUtils.maxNumberInput
     
     // External URLs
