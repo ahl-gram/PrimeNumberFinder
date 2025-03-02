@@ -88,85 +88,116 @@ struct ContentView: View {
     
     // MARK: - View Components
     var inputField: some View {
-        TextField("Enter a positive integer", text: $inputNumber)
-            .textFieldStyle(RoundedBorderTextFieldStyle())
-            .keyboardType(.numberPad)
-            .padding()
-            .background(secondaryBackgroundColor)
-            .cornerRadius(12)
-            .padding(.horizontal)
-            .focused($isInputFocused)
-            .toolbar {
-                ToolbarItemGroup(placement: .keyboard) {
-                    Spacer()
-                    Button("Done") {
-                        dismissKeyboard()
+        ZStack(alignment: .leading) {
+            // Background
+            secondaryBackgroundColor
+                .cornerRadius(12)
+                .padding(.horizontal)
+            
+            HStack {
+                // Clear button
+                if !inputNumber.isEmpty {
+                    Button(action: {
+                        // This is a direct user action, so set isUserTyping to true
+                        isUserTyping = true
+                        isButtonChange = true
+                        inputNumber = ""
+                        result = ""
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(.gray)
+                            .imageScale(.medium)
+                            .padding(.leading, 16)
+                            .padding(.vertical, 8)
+                            .padding(.horizontal, 8)
                     }
                 }
-            }
-            .accessibilityLabel("Input Number Field")
-            .onChange(of: inputNumber) { newValue in
-                // Only set isUserTyping to true if this is not a programmatic change
-                if isButtonChange {
-                    // Reset the flag for the next change
-                    isButtonChange = false
-                } else {
-                    isUserTyping = true
-                }
                 
-                let filtered = newValue.filter { "0123456789".contains($0) }
+                Spacer()
                 
-                // Provide haptic feedback if input was filtered
-                if filtered != newValue {
-                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                }
-                
-                // Remove leading zeros unless the entire input is "0"
-                var processedInput = filtered
-                if processedInput.count > 1 && processedInput.first == "0" {
-                    processedInput = String(Int(processedInput) ?? 0)
-                }
-                
-                // Enforce maximum length
-                if processedInput.count > maxInputLength {
-                    inputNumber = String(processedInput.prefix(maxInputLength))
-                    UINotificationFeedbackGenerator().notificationOccurred(.warning)
-                } else {
-                    inputNumber = processedInput
-                }
-                
-                // Clear result only when user is directly typing
-                if isUserTyping && !result.isEmpty {
-                    result = ""
-                    if isResultExpanded {
-                        isResultExpanded = false
-                    }
+                // This is a custom view that displays the formatted number
+                // but allows editing with the number pad
+                if inputNumber.isEmpty {
+                    Text("0")
+                        .foregroundColor(.gray)
+                        .padding(.trailing, 16)
+                        .padding(.vertical, 4)
+                        .padding(.horizontal, 8)
+                        .font(.title)
+                        .multilineTextAlignment(.trailing)
+                } else if let number = UInt64(inputNumber) {
+                    // Format with thousands separators
+                    Text(NumberFormatter.localizedString(from: NSNumber(value: number), number: .decimal))
+                        .padding(.trailing, 16)
+                        .padding(.vertical, 4)
+                        .padding(.horizontal, 8)
+                        .foregroundColor(.primary)
+                        .font(.title)
+                        .multilineTextAlignment(.trailing)
                 }
             }
-            .overlay(
-                Group {
-                    if !inputNumber.isEmpty {
-                        HStack {
-                            Spacer()
-                            Button(action: {
-                                // This is a direct user action, so set isUserTyping to true
-                                isUserTyping = true
-                                isButtonChange = true
-                                inputNumber = ""
-                                result = ""
-                                UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                            }) {
-                                Image(systemName: "xmark.circle.fill")
-                                    .foregroundColor(.gray)
-                                    .padding(.trailing, 8)
-                                    .imageScale(.medium)
-                                    .padding(.trailing, 24)
-                                    .padding(.vertical, 12)
-                            }
+        }
+        .frame(height: 48)
+        .padding(.vertical, 4)
+        .onTapGesture {
+            isInputFocused = true
+        }
+        // Invisible TextField to handle the actual input
+        .overlay(
+            TextField("", text: $inputNumber)
+                .keyboardType(.numberPad)
+                .focused($isInputFocused)
+                .opacity(0)
+                .frame(width: 0, height: 0)
+                .toolbar {
+                    ToolbarItemGroup(placement: .keyboard) {
+                        Spacer()
+                        Button("Done") {
+                            dismissKeyboard()
                         }
                     }
                 }
-            )
+                .onChange(of: inputNumber) { newValue in
+                    // Only set isUserTyping to true if this is not a programmatic change
+                    if isButtonChange {
+                        // Reset the flag for the next change
+                        isButtonChange = false
+                    } else {
+                        isUserTyping = true
+                    }
+                    
+                    let filtered = newValue.filter { "0123456789".contains($0) }
+                    
+                    // Provide haptic feedback if input was filtered
+                    if filtered != newValue {
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    }
+                    
+                    // Remove leading zeros unless the entire input is "0"
+                    var processedInput = filtered
+                    if processedInput.count > 1 && processedInput.first == "0" {
+                        processedInput = String(Int(processedInput) ?? 0)
+                    }
+                    
+                    // Enforce maximum length
+                    if processedInput.count > maxInputLength {
+                        inputNumber = String(processedInput.prefix(maxInputLength))
+                        UINotificationFeedbackGenerator().notificationOccurred(.warning)
+                    } else {
+                        inputNumber = processedInput
+                    }
+                    
+                    // Clear result only when user is directly typing
+                    if isUserTyping && !result.isEmpty {
+                        result = ""
+                        if isResultExpanded {
+                            isResultExpanded = false
+                        }
+                    }
+                }
+        )
+        .accessibilityLabel("Input Number Field")
     }
     
     var checkButton: some View {
