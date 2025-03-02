@@ -9,10 +9,10 @@ import Foundation
 
 struct PrimeFinderUtils {
     // Constants
-    static let maxNumberInput = 9999999999
+    static let maxNumberInput: UInt64 = 9_999_999_999_999_999_999
     
     // MARK: - Prime Checking Functions
-    static func isPrime(_ number: Int) -> Bool {
+    static func isPrime(_ number: UInt64) -> Bool {
         if number < 2 { return false }
         if number == 2 || number == 3 { return true }
         if number % 2 == 0 || number % 3 == 0 { return false }
@@ -21,10 +21,10 @@ struct PrimeFinderUtils {
         // If number has a factor greater than its square root,
         // it must also have a corresponding factor smaller than its square root.
         // Therefore, it's enough to check for factors up to the square root of number.
-        let limit = Int(Double(number).squareRoot())
+        let limit = UInt64(Double(number).squareRoot())
         
         // Loop through potential factors starting at 5 using the 6k +- 1 optimization
-        var i = 5
+        var i: UInt64 = 5
         while i <= limit {
             if number % i == 0 {
                 // 6k - 1 is a divisor, so number is composite
@@ -44,7 +44,7 @@ struct PrimeFinderUtils {
         return true
     }
     
-    static func isMersennePrime(_ number: Int) -> Bool {
+    static func isMersennePrime(_ number: UInt64) -> Bool {
         // A Mersenne prime is a prime number of the form 2^n - 1
         // First check if the number is prime
         if !isPrime(number) {
@@ -60,7 +60,7 @@ struct PrimeFinderUtils {
     }
     
     // MARK: - Factor Functions
-    static func allFactors(_ number: Int) -> [Int] {
+    static func allFactors(_ number: UInt64) -> [UInt64] {
         // Return empty array for invalid inputs
         if number < 1 {
             return []
@@ -71,10 +71,10 @@ struct PrimeFinderUtils {
             return []
         }
         
-        var factors = Set<Int>() // Use Set to avoid duplicates
+        var factors = Set<UInt64>() // Use Set to avoid duplicates
         
         // Find factors up to the square root
-        let sqrtNum = Int(Double(number).squareRoot())
+        let sqrtNum = UInt64(Double(number).squareRoot())
         for i in 2...sqrtNum {  // Start from 2 to exclude 1
             if number % i == 0 {
                 factors.insert(i)
@@ -89,10 +89,10 @@ struct PrimeFinderUtils {
         return Array(factors).sorted()
     }
     
-    static func primeFactors(_ number: Int) -> [Int] {
-        var n = number
-        var factors: [Int] = []
-        var divisor = 2
+    static func primeFactors(_ number: UInt64) -> [UInt64] {
+        var n: UInt64 = number
+        var factors: [UInt64] = []
+        var divisor: UInt64 = 2
         
         while n >= 2 {
             while n % divisor == 0 {
@@ -113,10 +113,10 @@ struct PrimeFinderUtils {
     }
     
     // MARK: - Navigation Functions
-    static func findNextPrime(_ from: Int) -> Int? {
+    static func findNextPrime(_ from: UInt64) -> UInt64? {
         var current = from + 1
         // Prevent integer overflow
-        while current <= Int.max && current <= maxNumberInput {
+        while current <= UInt64.max && current <= maxNumberInput {
             if isPrime(current) {
                 return current
             }
@@ -125,7 +125,7 @@ struct PrimeFinderUtils {
         return nil
     }
     
-    static func findPreviousPrime(_ from: Int) -> Int? {
+    static func findPreviousPrime(_ from: UInt64) -> UInt64? {
         var current = from - 1
         while current >= 2 {
             if isPrime(current) {
@@ -138,7 +138,7 @@ struct PrimeFinderUtils {
     
     // MARK: - Validation Functions
     static func isValidInput(_ input: String) -> Bool {
-        guard let number = Int(input) else { return false }
+        guard let number = UInt64(input) else { return false }
         return number > 0
     }
 } 

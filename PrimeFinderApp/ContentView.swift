@@ -9,7 +9,7 @@ import SwiftUI
 
 struct HistoryItem: Identifiable, Equatable {
     let id = UUID()
-    let number: Int
+    let number: UInt64
     let result: String
     let timestamp: Date
 }
@@ -29,7 +29,7 @@ struct ContentView: View {
     @State private var isButtonChange = false // Track if change is from a button
     
     // MARK: - Constants
-    let maxInputLength = 10 // Prevent integer overflow
+    let maxInputLength = 19 // Prevent integer overflow
     let maxNumberInput = PrimeFinderUtils.maxNumberInput
     
     // External URLs
@@ -49,7 +49,7 @@ struct ContentView: View {
         UIImpactFeedbackGenerator(style: .light).impactOccurred()
     }
     
-    func addToHistory(number: Int, result: String) {
+    func addToHistory(number: UInt64, result: String) {
         let historyItem = HistoryItem(number: number, result: result, timestamp: Date())
         history.insert(historyItem, at: 0) // Add to beginning of array
     }
@@ -63,7 +63,7 @@ struct ContentView: View {
             return
         }
         
-        guard let number = Int(inputNumber) else { return }
+        guard let number: UInt64 = UInt64(inputNumber) else { return }
         
         // Provide success haptic feedback
         UINotificationFeedbackGenerator().notificationOccurred(.success)
@@ -177,7 +177,7 @@ struct ContentView: View {
                 isUserTyping = false
                 isButtonChange = true
                 
-                if let number = Int(inputNumber),
+                if let number = UInt64(inputNumber),
                    let previousPrime = PrimeFinderUtils.findPreviousPrime(number) {
                     inputNumber = String(previousPrime)
                     UINotificationFeedbackGenerator().notificationOccurred(.success)
@@ -271,7 +271,7 @@ struct ContentView: View {
                 isUserTyping = false
                 isButtonChange = true
                 
-                if let number = Int(inputNumber),
+                if let number = UInt64(inputNumber),
                    let nextPrime = PrimeFinderUtils.findNextPrime(number) {
                     inputNumber = String(nextPrime)
                     UINotificationFeedbackGenerator().notificationOccurred(.success)
@@ -343,7 +343,7 @@ struct ContentView: View {
                 .frame(maxWidth: .infinity)
                 
                 if isResultExpanded {
-                    if let number = Int(inputNumber), !PrimeFinderUtils.isPrime(number), number > 1 {
+                    if let number = UInt64(inputNumber), !PrimeFinderUtils.isPrime(number), number > 1 {
                         VStack(alignment: .leading, spacing: 12) {
                             Text("🔢 All Factors")
                                 .font(.headline)
@@ -571,7 +571,7 @@ struct ContentView: View {
             
             Section(header: Text("Tips")) {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("• Numbers are limited to 10 digits to prevent overflow")
+                    Text("• Numbers are limited to \(maxInputLength) digits to prevent overflow")
                     Text("• Clear the input field using the 🅧 button")
                     Text("• Tap anywhere to dismiss the keyboard")
                     Text("• Green results indicate prime numbers")
