@@ -9,7 +9,7 @@ import SwiftUI
 
 struct HistoryItem: Identifiable, Equatable {
     let id = UUID()
-    let number: Int
+    let number: UInt64
     let result: String
     let timestamp: Date
 }
@@ -29,7 +29,7 @@ struct ContentView: View {
     @State private var isButtonChange = false // Track if change is from a button
     
     // MARK: - Constants
-    let maxInputLength = 10 // Prevent integer overflow
+    let maxInputLength = 13
     let maxNumberInput = PrimeFinderUtils.maxNumberInput
     
     // External URLs
@@ -49,7 +49,7 @@ struct ContentView: View {
         UIImpactFeedbackGenerator(style: .light).impactOccurred()
     }
     
-    func addToHistory(number: Int, result: String) {
+    func addToHistory(number: UInt64, result: String) {
         let historyItem = HistoryItem(number: number, result: result, timestamp: Date())
         history.insert(historyItem, at: 0) // Add to beginning of array
     }
@@ -63,7 +63,7 @@ struct ContentView: View {
             return
         }
         
-        guard let number = Int(inputNumber) else { return }
+        guard let number: UInt64 = UInt64(inputNumber) else { return }
         
         // Provide success haptic feedback
         UINotificationFeedbackGenerator().notificationOccurred(.success)
@@ -72,7 +72,7 @@ struct ContentView: View {
         let formattedNumber = NumberFormatter.localizedString(from: NSNumber(value: number), number: .decimal)
         
         if number == 1 {
-            result = "\(formattedNumber) is defined as not a prime."
+            result = "\(formattedNumber) is defined as not a prime number."
         }
         else {
             if PrimeFinderUtils.isPrime(number) {
@@ -88,85 +88,117 @@ struct ContentView: View {
     
     // MARK: - View Components
     var inputField: some View {
-        TextField("Enter a positive integer", text: $inputNumber)
-            .textFieldStyle(RoundedBorderTextFieldStyle())
-            .keyboardType(.numberPad)
-            .padding()
-            .background(secondaryBackgroundColor)
-            .cornerRadius(12)
-            .padding(.horizontal)
-            .focused($isInputFocused)
-            .toolbar {
-                ToolbarItemGroup(placement: .keyboard) {
-                    Spacer()
-                    Button("Done") {
-                        dismissKeyboard()
+        ZStack(alignment: .leading) {
+            // Background
+            secondaryBackgroundColor
+                .cornerRadius(12)
+                .padding(.horizontal)
+            
+            HStack {
+                // Clear button
+                if !inputNumber.isEmpty {
+                    Button(action: {
+                        // This is a direct user action, so set isUserTyping to true
+                        isUserTyping = true
+                        isButtonChange = true
+                        inputNumber = ""
+                        result = ""
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(.gray)
+                            .imageScale(.medium)
+                            .padding(.leading, 16)
+                            .padding(.vertical, 8)
+                            .padding(.horizontal, 8)
                     }
                 }
-            }
-            .accessibilityLabel("Input Number Field")
-            .onChange(of: inputNumber) { newValue in
-                // Only set isUserTyping to true if this is not a programmatic change
-                if isButtonChange {
-                    // Reset the flag for the next change
-                    isButtonChange = false
-                } else {
-                    isUserTyping = true
-                }
                 
-                let filtered = newValue.filter { "0123456789".contains($0) }
+                Spacer()
                 
-                // Provide haptic feedback if input was filtered
-                if filtered != newValue {
-                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                }
-                
-                // Remove leading zeros unless the entire input is "0"
-                var processedInput = filtered
-                if processedInput.count > 1 && processedInput.first == "0" {
-                    processedInput = String(Int(processedInput) ?? 0)
-                }
-                
-                // Enforce maximum length
-                if processedInput.count > maxInputLength {
-                    inputNumber = String(processedInput.prefix(maxInputLength))
-                    UINotificationFeedbackGenerator().notificationOccurred(.warning)
-                } else {
-                    inputNumber = processedInput
-                }
-                
-                // Clear result only when user is directly typing
-                if isUserTyping && !result.isEmpty {
-                    result = ""
-                    if isResultExpanded {
-                        isResultExpanded = false
-                    }
+                // This is a custom view that displays the formatted number
+                // but allows editing with the number pad
+                if inputNumber.isEmpty {
+                    Text("0")
+                        .foregroundColor(.gray)
+                        .padding(.trailing, 16)
+                        .padding(.vertical, 4)
+                        .padding(.horizontal, 8)
+                        .font(.title)
+                        .multilineTextAlignment(.trailing)
+                } else if let number = UInt64(inputNumber) {
+                    // Format with thousands separators
+                    Text(NumberFormatter.localizedString(from: NSNumber(value: number), number: .decimal))
+                        .padding(.trailing, 16)
+                        .padding(.vertical, 4)
+                        .padding(.horizontal, 8)
+                        .foregroundColor(.primary)
+                        .font(.title)
+                        .multilineTextAlignment(.trailing)
                 }
             }
-            .overlay(
-                Group {
-                    if !inputNumber.isEmpty {
-                        HStack {
-                            Spacer()
-                            Button(action: {
-                                // This is a direct user action, so set isUserTyping to true
-                                isUserTyping = true
-                                isButtonChange = true
-                                inputNumber = ""
-                                result = ""
-                                UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                            }) {
-                                Image(systemName: "xmark.circle.fill")
-                                    .foregroundColor(.gray)
-                                    .padding(.trailing, 8)
-                                    .imageScale(.medium)
-                                    .padding(.trailing, 24)
-                                    .padding(.vertical, 12)
-                            }
+        }
+        .frame(height: 56)
+        .padding(.vertical, 4)
+        .onTapGesture {
+            isInputFocused = true
+        }
+
+        // Invisible TextField to handle the actual input
+        .overlay(
+            TextField("", text: $inputNumber)
+                .keyboardType(.numberPad)
+                .focused($isInputFocused)
+                .opacity(0)
+                .frame(width: 0, height: 0)
+                .toolbar {
+                    ToolbarItemGroup(placement: .keyboard) {
+                        Spacer()
+                        Button("Done") {
+                            dismissKeyboard()
                         }
                     }
                 }
-            )
+                .onChange(of: inputNumber) { newValue in
+                    // Only set isUserTyping to true if this is not a programmatic change
+                    if isButtonChange {
+                        // Reset the flag for the next change
+                        isButtonChange = false
+                    } else {
+                        isUserTyping = true
+                    }
+                    
+                    let filtered = newValue.filter { "0123456789".contains($0) }
+                    
+                    // Provide haptic feedback if input was filtered
+                    if filtered != newValue {
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    }
+                    
+                    // Remove leading zeros unless the entire input is "0"
+                    var processedInput = filtered
+                    if processedInput.count > 1 && processedInput.first == "0" {
+                        processedInput = String(Int(processedInput) ?? 0)
+                    }
+                    
+                    // Enforce maximum length
+                    if processedInput.count > maxInputLength {
+                        inputNumber = String(processedInput.prefix(maxInputLength))
+                        UINotificationFeedbackGenerator().notificationOccurred(.warning)
+                    } else {
+                        inputNumber = processedInput
+                    }
+                    
+                    // Clear result only when user is directly typing
+                    if isUserTyping && !result.isEmpty {
+                        result = ""
+                        if isResultExpanded {
+                            isResultExpanded = false
+                        }
+                    }
+                }
+        )
+        .accessibilityLabel("Input Number Field")
     }
     
     var checkButton: some View {
@@ -177,7 +209,7 @@ struct ContentView: View {
                 isUserTyping = false
                 isButtonChange = true
                 
-                if let number = Int(inputNumber),
+                if let number = UInt64(inputNumber),
                    let previousPrime = PrimeFinderUtils.findPreviousPrime(number) {
                     inputNumber = String(previousPrime)
                     UINotificationFeedbackGenerator().notificationOccurred(.success)
@@ -271,7 +303,7 @@ struct ContentView: View {
                 isUserTyping = false
                 isButtonChange = true
                 
-                if let number = Int(inputNumber),
+                if let number = UInt64(inputNumber),
                    let nextPrime = PrimeFinderUtils.findNextPrime(number) {
                     inputNumber = String(nextPrime)
                     UINotificationFeedbackGenerator().notificationOccurred(.success)
@@ -343,9 +375,9 @@ struct ContentView: View {
                 .frame(maxWidth: .infinity)
                 
                 if isResultExpanded {
-                    if let number = Int(inputNumber), !PrimeFinderUtils.isPrime(number), number > 1 {
+                    if let number = UInt64(inputNumber), !PrimeFinderUtils.isPrime(number), number > 1 {
                         VStack(alignment: .leading, spacing: 12) {
-                            Text("🔢 All Factors")
+                            Text("🔢 All factors")
                                 .font(.headline)
                                 .foregroundColor(primaryColor)
                             
@@ -571,7 +603,7 @@ struct ContentView: View {
             
             Section(header: Text("Tips")) {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("• Numbers are limited to 10 digits to prevent overflow")
+                    Text("• Numbers are limited to \(maxInputLength) digits to prevent overflow")
                     Text("• Clear the input field using the 🅧 button")
                     Text("• Tap anywhere to dismiss the keyboard")
                     Text("• Green results indicate prime numbers")

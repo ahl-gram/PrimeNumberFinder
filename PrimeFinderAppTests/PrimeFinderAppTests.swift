@@ -46,7 +46,7 @@ class MockContentView {
     }
     
     func findNextPrime() {
-        if let number = Int(inputNumber),
+        if let number = UInt64(inputNumber),
            let nextPrime = PrimeFinderUtils.findNextPrime(number) {
             isUserTyping = false
             isProgrammaticChange = true
@@ -57,7 +57,7 @@ class MockContentView {
     }
     
     func findPreviousPrime() {
-        if let number = Int(inputNumber),
+        if let number = UInt64(inputNumber),
            let previousPrime = PrimeFinderUtils.findPreviousPrime(number) {
             isUserTyping = false
             isProgrammaticChange = true
@@ -94,7 +94,7 @@ class MockContentView {
             return
         }
         
-        guard let number = Int(inputNumber) else { return }
+        guard let number = UInt64(inputNumber) else { return }
         
         // Format number with thousands separator
         let formattedNumber = NumberFormatter.localizedString(from: NSNumber(value: number), number: .decimal)
@@ -233,7 +233,7 @@ final class PrimeFinderAppTests: XCTestCase {
         // Test edge cases
         XCTAssertFalse(PrimeFinderUtils.isMersennePrime(1))
         XCTAssertFalse(PrimeFinderUtils.isMersennePrime(0))
-        XCTAssertFalse(PrimeFinderUtils.isMersennePrime(-1))
+        //XCTAssertFalse(PrimeFinderUtils.isMersennePrime(-1))
     }
     
     // MARK: - All Factors Tests
@@ -256,7 +256,7 @@ final class PrimeFinderAppTests: XCTestCase {
         // Test edge cases
         XCTAssertEqual(PrimeFinderUtils.allFactors(1), [])
         XCTAssertEqual(PrimeFinderUtils.allFactors(0), [])
-        XCTAssertEqual(PrimeFinderUtils.allFactors(-1), [])
+        //XCTAssertEqual(PrimeFinderUtils.allFactors(-1), [])
                                                     
         // Test some larger numbers
         XCTAssertEqual(PrimeFinderUtils.allFactors(120), [2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 24, 30, 40, 60])
@@ -292,7 +292,7 @@ final class PrimeFinderAppTests: XCTestCase {
     // MARK: - History Item Tests
     
     func testHistoryItemCreation() {
-        let number = 17
+        let number: UInt64 = 17
         let result = "17 is a prime number."
         let timestamp = Date()
         
