@@ -29,7 +29,7 @@ struct ContentView: View {
     @State private var isButtonChange = false // Track if change is from a button
     
     // MARK: - Constants
-    let maxInputLength = 13 // Prevent integer overflow
+    let maxInputLength = 13
     let maxNumberInput = PrimeFinderUtils.maxNumberInput
     
     // External URLs
@@ -72,7 +72,7 @@ struct ContentView: View {
         let formattedNumber = NumberFormatter.localizedString(from: NSNumber(value: number), number: .decimal)
         
         if number == 1 {
-            result = "\(formattedNumber) is defined as not a prime."
+            result = "\(formattedNumber) is defined as not a prime number."
         }
         else {
             if PrimeFinderUtils.isPrime(number) {
@@ -138,11 +138,12 @@ struct ContentView: View {
                 }
             }
         }
-        .frame(height: 48)
+        .frame(height: 56)
         .padding(.vertical, 4)
         .onTapGesture {
             isInputFocused = true
         }
+
         // Invisible TextField to handle the actual input
         .overlay(
             TextField("", text: $inputNumber)
@@ -376,7 +377,7 @@ struct ContentView: View {
                 if isResultExpanded {
                     if let number = UInt64(inputNumber), !PrimeFinderUtils.isPrime(number), number > 1 {
                         VStack(alignment: .leading, spacing: 12) {
-                            Text("🔢 All Factors")
+                            Text("🔢 All factors")
                                 .font(.headline)
                                 .foregroundColor(primaryColor)
                             
