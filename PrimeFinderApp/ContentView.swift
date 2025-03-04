@@ -36,6 +36,46 @@ struct ContentView: View {
     let maxInputLength = 18
     let maxNumberInput = PrimeFinderUtils.maxNumberInput
     
+    // Font size calculation for responsive input display
+    private func calculateFontSize(for inputLength: Int) -> CGFloat {
+        // Get the dynamic title text style size based on user preferences
+        let titleSize = UIFont.preferredFont(forTextStyle: .title1).pointSize
+        let minSize = UIFont.preferredFont(forTextStyle: .callout).pointSize
+        
+        // Scale the digits threshold based on font size - even more conservative now
+        // Smaller font = more digits before scaling down
+        let digitsThreshold: Int
+        if titleSize <= 20 {
+            digitsThreshold = 18  // Very small text can fit 18 digits
+        } else if titleSize <= 25 {
+            digitsThreshold = 16  // Small text can fit 16 digits
+        } else if titleSize <= 30 {
+            digitsThreshold = 14  // Medium text can fit 14 digits
+        } else {
+            digitsThreshold = 12  // Large text starts scaling at 12 digits
+        }
+        
+        if inputLength <= digitsThreshold {
+            return titleSize
+        } else {
+            // More gradual scaling rate based on the base font size
+            // For smaller fonts, scaling is extremely gentle
+            let scaleRate: CGFloat
+            if titleSize <= 20 {
+                scaleRate = 0.015  // 1.5% reduction per extra digit for tiny text
+            } else if titleSize <= 25 {
+                scaleRate = 0.02   // 2% reduction for small text
+            } else {
+                scaleRate = min(0.025, 0.02 + (titleSize / 1000)) // 2.5% max for larger text
+            }
+            
+            let extraDigits = CGFloat(inputLength - digitsThreshold)
+            let scaleFactor = 1.0 - (extraDigits * scaleRate)
+            let scaledSize = titleSize * max(scaleFactor, minSize/titleSize)
+            return max(scaledSize, minSize)
+        }
+    }
+    
     // External URLs
     let wikipediaURL = "https://en.wikipedia.org/wiki/Prime_number"
     let oeisURL = "https://oeis.org/A000040"
@@ -96,19 +136,56 @@ struct ContentView: View {
             let factors = PrimeFinderUtils.allFactors(number).sorted()
             
             // Calculate the duration
-            let duration = Date().timeIntervalSince(startTime)
+            let _ = Date().timeIntervalSince(startTime)
             
             // Cancel the spinner task if it hasn't triggered yet
             spinnerTask.cancel()
             
-            // Update the UI on the main thread, but only if this is still the current calculation
+            // Get back to the main thread to update UI
             await MainActor.run {
-                // Check if this task is still the current one
+                // Only update UI if this calculation is still current (not cancelled)
                 if thisCalculationID == self.currentCalculationID {
-                    // Update state with results
                     self.currentFactors = factors
+                    // Always set isCalculating to false when complete
                     self.isCalculating = false
-                    self.calculationStartTime = nil
+                    
+                    // Only update the prime factors display if this calculation is still relevant
+                    if result.isEmpty && !inputNumber.isEmpty, let number = UInt64(inputNumber) {
+                        if number == 1 {
+                            result = "\(number) is defined as not a prime number."
+                        }
+                        else {
+                            if PrimeFinderUtils.isPrime(number) {
+                                // Get the formatted number with commas
+                                let formattedNumber: String
+                                if number > 9_999_999_999_999_000 {
+                                    formattedNumber = formatLargeNumber(String(number))
+                                } else {
+                                    formattedNumber = NumberFormatter.localizedString(from: NSNumber(value: number), number: .decimal)
+                                }
+                                result = "✅ \(formattedNumber) is a prime number."
+                            } else {
+                                let primeFactors = PrimeFinderUtils.primeFactors(number)
+                                // Get the formatted number with commas
+                                let formattedNumber: String
+                                if number > 9_999_999_999_999_000 {
+                                    formattedNumber = formatLargeNumber(String(number))
+                                } else {
+                                    formattedNumber = NumberFormatter.localizedString(from: NSNumber(value: number), number: .decimal)
+                                }
+                                let formattedFactors = primeFactors.map { 
+                                    let factor = $0
+                                    if factor > 9_999_999_999_999_000 {
+                                        return formatLargeNumber(String(factor))
+                                    } else {
+                                        return NumberFormatter.localizedString(from: NSNumber(value: factor), number: .decimal)
+                                    }
+                                }
+                                result = "☑️ \(formattedNumber) is not a prime number.\nPrime factors: \(formattedFactors.joined(separator: " × "))"
+                            }
+                        }
+                        addToHistory(number: number, result: result)
+                    }
                 }
             }
         }
@@ -162,8 +239,13 @@ struct ContentView: View {
             }
         }
         
-        // Format number with thousands separator
-        let formattedNumber = NumberFormatter.localizedString(from: NSNumber(value: number), number: .decimal)
+        // Format number with thousands separator - with manual formatting for very large numbers
+        let formattedNumber: String
+        if number > 9_999_999_999_999_000 { // For very large numbers
+            formattedNumber = formatLargeNumber(String(number))
+        } else {
+            formattedNumber = NumberFormatter.localizedString(from: NSNumber(value: number), number: .decimal)
+        }
         
         if number == 1 {
             result = "\(formattedNumber) is defined as not a prime number."
@@ -173,72 +255,85 @@ struct ContentView: View {
                 result = "✅ \(formattedNumber) is a prime number."
             } else {
                 let factors = PrimeFinderUtils.primeFactors(number)
-                let formattedFactors = factors.map { NumberFormatter.localizedString(from: NSNumber(value: $0), number: .decimal) }
+                let formattedFactors = factors.map { 
+                    let factor = $0
+                    if factor > 9_999_999_999_999_000 {
+                        return formatLargeNumber(String(factor))
+                    } else {
+                        return NumberFormatter.localizedString(from: NSNumber(value: factor), number: .decimal)
+                    }
+                }
                 result = "☑️ \(formattedNumber) is not a prime number.\nPrime factors: \(formattedFactors.joined(separator: " × "))"
             }
         }
         addToHistory(number: number, result: result)
     }
     
+    // Helper function to format large numbers with commas
+    private func formatLargeNumber(_ numberString: String) -> String {
+        var result = ""
+        var remainingDigits = numberString
+        
+        // Add commas for thousands separators
+        while remainingDigits.count > 3 {
+            let endIndex = remainingDigits.index(remainingDigits.endIndex, offsetBy: -3)
+            let lastThree = String(remainingDigits[endIndex...])
+            result = "," + lastThree + result
+            remainingDigits = String(remainingDigits[..<endIndex])
+        }
+        
+        // Add the remaining digits
+        if !remainingDigits.isEmpty {
+            return remainingDigits + result
+        } else {
+            return String(result.dropFirst()) // Remove leading comma
+        }
+    }
+    
     // MARK: - View Components
     var inputField: some View {
-        ZStack(alignment: .leading) {
-            // Background
-            secondaryBackgroundColor
-                .cornerRadius(12)
-                .padding(.horizontal)
-            
-            HStack {
-                // Clear button
-                if !inputNumber.isEmpty {
-                    Button(action: {
-                        // This is a direct user action, so set isUserTyping to true
-                        isUserTyping = true
-                        isButtonChange = true
-                        inputNumber = ""
-                        result = ""
-                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                    }) {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.gray)
-                            .imageScale(.medium)
-                            .padding(.leading, 16)
-                            .padding(.vertical, 8)
-                            .padding(.horizontal, 8)
-                    }
-                }
-                
-                Spacer()
-                
-                // This is a custom view that displays the formatted number
-                // but allows editing with the number pad
-                if inputNumber.isEmpty {
-                    Text("0")
+        HStack {
+            // Clear button
+            if !inputNumber.isEmpty {
+                Button(action: {
+                    // This is a direct user action, so set isUserTyping to true
+                    isUserTyping = true
+                    isButtonChange = true
+                    inputNumber = ""
+                    result = ""
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                }) {
+                    Image(systemName: "xmark.circle.fill")
                         .foregroundColor(.gray)
-                        .padding(.trailing, 16)
-                        .padding(.vertical, 4)
-                        .padding(.horizontal, 8)
-                        .font(.title)
-                        .multilineTextAlignment(.trailing)
-                } else if let number = UInt64(inputNumber) {
-                    // Format with thousands separators
-                    Text(NumberFormatter.localizedString(from: NSNumber(value: number), number: .decimal))
-                        .padding(.trailing, 16)
-                        .padding(.vertical, 4)
-                        .padding(.horizontal, 8)
-                        .foregroundColor(.primary)
-                        .font(.title)
-                        .multilineTextAlignment(.trailing)
+                        .imageScale(.medium)
+                        .padding(.leading, 16)
                 }
+            }
+            
+            Spacer()
+            
+            // Number display
+            if inputNumber.isEmpty {
+                Text("0")
+                    .foregroundColor(.gray)
+                    .font(.system(size: UIFont.preferredFont(forTextStyle: .title1).pointSize, weight: .medium, design: .rounded))
+                    .padding(.trailing, 16)
+            } else if let number = UInt64(inputNumber) {
+                Text(formatDisplayNumber(number))
+                    .foregroundColor(.primary)
+                    .font(.system(size: calculateFontSize(for: inputNumber.count), weight: .medium, design: .rounded))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
+                    .padding(.trailing, 16)
             }
         }
         .frame(height: 56)
+        .background(
+            secondaryBackgroundColor
+                .cornerRadius(12)
+        )
+        .padding(.horizontal)
         .padding(.vertical, 4)
-        .onTapGesture {
-            isInputFocused = true
-        }
-
-        // Invisible TextField to handle the actual input
         .overlay(
             TextField("", text: $inputNumber)
                 .keyboardType(.numberPad)
@@ -262,6 +357,7 @@ struct ContentView: View {
                         isUserTyping = true
                     }
                     
+                    // Filter to digits only
                     let filtered = newValue.filter { "0123456789".contains($0) }
                     
                     // Provide haptic feedback if input was filtered
@@ -283,20 +379,31 @@ struct ContentView: View {
                         inputNumber = processedInput
                     }
                     
-                    // Clear result only when user is directly typing
+                    // Clear result when typing
                     if isUserTyping && !result.isEmpty {
                         result = ""
                         if isResultExpanded {
                             isResultExpanded = false
                             currentFactors = []
                             isCalculating = false
-                            // Generate a new ID to invalidate any ongoing calculations
                             currentCalculationID = UUID()
                         }
                     }
                 }
         )
+        .onTapGesture {
+            isInputFocused = true
+        }
         .accessibilityLabel("Input Number Field")
+    }
+    
+    // Helper function to format display numbers properly
+    private func formatDisplayNumber(_ number: UInt64) -> String {
+        if number > 9_999_999_999_999_000 {
+            return formatLargeNumber(String(number))
+        } else {
+            return NumberFormatter.localizedString(from: NSNumber(value: number), number: .decimal)
+        }
     }
     
     var checkButton: some View {
@@ -543,14 +650,10 @@ struct ContentView: View {
                                     
                                     VStack(alignment: .leading, spacing: 12) {
                                         ForEach(Array(factors.enumerated()), id: \.element) { index, factor in
-                                            // Format large numbers with thousands separator for display
-                                            let formattedNumber = NumberFormatter.localizedString(
-                                                from: NSNumber(value: factor), number: .decimal)
+                                            let indexWidth = getIndexColumnWidth(totalCount: factors.count)
                                             
                                             HStack(spacing: 12) {
-                                                // Use a dynamic width based on the number of digits in the index
-                                                let indexWidth = getIndexColumnWidth(totalCount: factors.count)
-                                                
+                                                // Index column with consistent width
                                                 Text("\(index + 1).")
                                                     .font(.body)
                                                     .foregroundColor(.gray)
@@ -558,6 +661,7 @@ struct ContentView: View {
                                                 
                                                 // For very large factors, use scrolling
                                                 ScrollView(.horizontal, showsIndicators: factor > 1_000_000) {
+                                                    // Factor display with action
                                                     Button(action: {
                                                         isUserTyping = false
                                                         isButtonChange = true
@@ -565,15 +669,29 @@ struct ContentView: View {
                                                         validateAndProcessInput()
                                                         UIImpactFeedbackGenerator(style: .light).impactOccurred()
                                                     }) {
-                                                        Text(formattedNumber)
-                                                            .font(.system(.body, design: .monospaced))
-                                                            .padding(.vertical, 8)
-                                                            .padding(.horizontal, 12)
-                                                            .background(
-                                                                RoundedRectangle(cornerRadius: 8)
-                                                                    .fill(primaryColor.opacity(0.1))
-                                                            )
-                                                            .foregroundColor(primaryColor)
+                                                        // Format the number as needed
+                                                        if factor > 9_999_999_999_999_000 {
+                                                            Text(formatLargeNumber(String(factor)))
+                                                                .font(.system(.body, design: .monospaced))
+                                                                .padding(.vertical, 8)
+                                                                .padding(.horizontal, 12)
+                                                                .background(
+                                                                    RoundedRectangle(cornerRadius: 8)
+                                                                        .fill(primaryColor.opacity(0.1))
+                                                                )
+                                                                .foregroundColor(primaryColor)
+                                                        } else {
+                                                            Text(NumberFormatter.localizedString(
+                                                                from: NSNumber(value: factor), number: .decimal))
+                                                                .font(.system(.body, design: .monospaced))
+                                                                .padding(.vertical, 8)
+                                                                .padding(.horizontal, 12)
+                                                                .background(
+                                                                    RoundedRectangle(cornerRadius: 8)
+                                                                        .fill(primaryColor.opacity(0.1))
+                                                                )
+                                                                .foregroundColor(primaryColor)
+                                                        }
                                                     }
                                                 }
                                                 
