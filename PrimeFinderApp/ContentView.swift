@@ -24,12 +24,16 @@ struct ContentView: View {
     @State internal var isResultExpanded = false
     @State private var editMode = EditMode.inactive
     @State private var showingFactorAlert = false
+    @State private var isCalculating = false
+    @State private var calculationStartTime: Date?
+    @State private var currentFactors: [UInt64] = []
+    @State private var currentCalculationID: UUID = UUID()
     @FocusState internal var isInputFocused: Bool
     @State private var isUserTyping = true
     @State private var isButtonChange = false // Track if change is from a button
     
     // MARK: - Constants
-    let maxInputLength = 13
+    let maxInputLength = 15
     let maxNumberInput = PrimeFinderUtils.maxNumberInput
     
     // External URLs
@@ -42,6 +46,86 @@ struct ContentView: View {
     let primaryColor = Color.blue
     let backgroundColor = Color(.systemBackground)
     let secondaryBackgroundColor = Color(.systemGray6)
+    
+    // MARK: - Computed Properties
+    private var factorsForCurrentNumber: [UInt64] {
+        return currentFactors
+    }
+    
+    // MARK: - Helper Methods
+    private func calculateFactors(for number: UInt64) {
+        // Generate a new calculation ID to invalidate any current calculation
+        if isCalculating {
+            currentCalculationID = UUID()
+        }
+        
+        // Reset any previous factors but don't show calculating state yet
+        currentFactors = []
+        calculationStartTime = Date()
+        
+        // Don't immediately show calculating state
+        // We'll show it only if the calculation takes longer than 1 second
+        
+        // Capture the current calculation ID to check if this task is still valid later
+        let thisCalculationID = currentCalculationID
+        
+        // Create a detached task to do the calculation in the background
+        Task.detached(priority: .userInitiated) {
+            // Start a timer to check if calculation takes > 1000ms
+            let startTime = Date()
+            
+            // Set a timer to show the spinner if calculation takes > 1 second
+            // This task will be cancelled if the calculation completes quickly
+            let spinnerTask = Task {
+                do {
+                    // Wait 1 second before showing the spinner
+                    try await Task.sleep(nanoseconds: 1_000_000_000) // 1 second
+                    
+                    // After 1 second, show the spinner if this is still the current calculation
+                    await MainActor.run {
+                        if thisCalculationID == self.currentCalculationID {
+                            self.isCalculating = true
+                        }
+                    }
+                } catch {
+                    // Task was cancelled, which is expected if calculation completes quickly
+                }
+            }
+            
+            // Perform the actual calculation
+            let factors = PrimeFinderUtils.allFactors(number).sorted()
+            
+            // Calculate the duration
+            let duration = Date().timeIntervalSince(startTime)
+            
+            // Cancel the spinner task if it hasn't triggered yet
+            spinnerTask.cancel()
+            
+            // Update the UI on the main thread, but only if this is still the current calculation
+            await MainActor.run {
+                // Check if this task is still the current one
+                if thisCalculationID == self.currentCalculationID {
+                    // Update state with results
+                    self.currentFactors = factors
+                    self.isCalculating = false
+                    self.calculationStartTime = nil
+                }
+            }
+        }
+    }
+    
+    // Helper function to calculate the width needed for the index column
+    private func getIndexColumnWidth(totalCount: Int) -> CGFloat {
+        if totalCount < 10 {
+            return 24 // Single digit (plus dot)
+        } else if totalCount < 100 {
+            return 32 // Double digit (plus dot)
+        } else if totalCount < 1000 {
+            return 42 // Triple digit (plus dot)
+        } else {
+            return 52 // For very large collections
+        }
+    }
     
     // MARK: - Keyboard Dismissal
     func dismissKeyboard() {
@@ -67,6 +151,16 @@ struct ContentView: View {
         
         // Provide success haptic feedback
         UINotificationFeedbackGenerator().notificationOccurred(.success)
+        
+        // Reset factors if the results area is expanded
+        if isResultExpanded {
+            currentFactors = []
+            if !PrimeFinderUtils.isPrime(number) && number > 1 {
+                // Don't immediately set isCalculating - our calculation method will handle it
+                // if the operation takes more than 1 second
+                calculateFactors(for: number)
+            }
+        }
         
         // Format number with thousands separator
         let formattedNumber = NumberFormatter.localizedString(from: NSNumber(value: number), number: .decimal)
@@ -194,6 +288,10 @@ struct ContentView: View {
                         result = ""
                         if isResultExpanded {
                             isResultExpanded = false
+                            currentFactors = []
+                            isCalculating = false
+                            // Generate a new ID to invalidate any ongoing calculations
+                            currentCalculationID = UUID()
                         }
                     }
                 }
@@ -258,10 +356,34 @@ struct ContentView: View {
                 validateAndProcessInput()
             }) {
                 HStack {
-                    Image(systemName: "checkmark.circle.fill")
-                        .imageScale(.large)
-                    Text("Check")
-                        .font(.headline)
+                    ZStack {
+                        if isCalculating {
+                            // Show spinner when calculation is in progress
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle())
+                                .tint(.white)
+                                .transition(.opacity)
+                        } else {
+                            Image(systemName: "checkmark.circle.fill")
+                                .imageScale(.large)
+                                .transition(.opacity)
+                        }
+                    }
+                    .frame(width: 20, height: 20)
+                    .animation(.easeInOut(duration: 0.3), value: isCalculating)
+                    
+                    ZStack {
+                        if isCalculating {
+                            Text("Calculating...")
+                                .font(.headline)
+                                .transition(.opacity)
+                        } else {
+                            Text("Check")
+                                .font(.headline)
+                                .transition(.opacity)
+                        }
+                    }
+                    .animation(.easeInOut(duration: 0.3), value: isCalculating)
                 }
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
@@ -334,6 +456,21 @@ struct ContentView: View {
                 Button(action: {
                     withAnimation(.spring()) {
                         isResultExpanded.toggle()
+                        
+                        // If collapsing the results, clear the factors and calculation state
+                        if !isResultExpanded {
+                            currentFactors = []
+                            isCalculating = false
+                            // Generate a new ID to invalidate any ongoing calculations
+                            currentCalculationID = UUID()
+                        } else if let number = UInt64(inputNumber), 
+                                  !PrimeFinderUtils.isPrime(number), 
+                                  number > 1 {
+                            // When expanding, start the calculation
+                            // The calculateFactors method will handle showing the spinner
+                            // only if the calculation takes more than 1 second
+                            calculateFactors(for: number)
+                        }
                     }
                     UIImpactFeedbackGenerator(style: .light).impactOccurred()
                 }) {
@@ -381,33 +518,74 @@ struct ContentView: View {
                                 .font(.headline)
                                 .foregroundColor(primaryColor)
                             
-                            let factors = PrimeFinderUtils.allFactors(number).sorted()
-                            VStack(alignment: .leading, spacing: 8) {
-                                ForEach(Array(factors.enumerated()), id: \.element) { index, factor in
-                                    HStack(spacing: 12) {
-                                        Text("\(index + 1).")
-                                            .font(.body)
-                                            .foregroundColor(.gray)
-                                        Button(action: {
-                                            isUserTyping = false
-                                            isButtonChange = true
-                                            inputNumber = String(factor)
-                                            validateAndProcessInput()
-                                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                                        }) {
-                                            Text("\(factor)")
-                                                .font(.system(.body, design: .monospaced))
-                                                .padding(.vertical, 8)
-                                                .padding(.horizontal, 12)
-                                                .background(
-                                                    RoundedRectangle(cornerRadius: 8)
-                                                        .fill(primaryColor.opacity(0.1))
-                                                )
-                                                .foregroundColor(primaryColor)
+                            // Wrap both states in an animation container for smooth transitions
+                            ZStack {
+                                // If factors are still being calculated, show a loading indicator
+                                if isCalculating {
+                                    HStack {
+                                        Spacer()
+                                        VStack {
+                                            ProgressView()
+                                                .progressViewStyle(CircularProgressViewStyle())
+                                            Text("Calculating factors...")
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                                .padding(.top, 8)
+                                        }
+                                        Spacer()
+                                    }
+                                    .padding(.vertical, 20)
+                                    .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.3)))
+                                } else {
+                                    // Use a computed property for the factors array
+                                    // This way, we're not recalculating every time the view redraws
+                                    let factors = factorsForCurrentNumber
+                                    
+                                    VStack(alignment: .leading, spacing: 12) {
+                                        ForEach(Array(factors.enumerated()), id: \.element) { index, factor in
+                                            // Format large numbers with thousands separator for display
+                                            let formattedNumber = NumberFormatter.localizedString(
+                                                from: NSNumber(value: factor), number: .decimal)
+                                            
+                                            HStack(spacing: 12) {
+                                                // Use a dynamic width based on the number of digits in the index
+                                                let indexWidth = getIndexColumnWidth(totalCount: factors.count)
+                                                
+                                                Text("\(index + 1).")
+                                                    .font(.body)
+                                                    .foregroundColor(.gray)
+                                                    .frame(width: indexWidth, alignment: .trailing)
+                                                
+                                                // For very large factors, use scrolling
+                                                ScrollView(.horizontal, showsIndicators: factor > 1_000_000) {
+                                                    Button(action: {
+                                                        isUserTyping = false
+                                                        isButtonChange = true
+                                                        inputNumber = String(factor)
+                                                        validateAndProcessInput()
+                                                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                                                    }) {
+                                                        Text(formattedNumber)
+                                                            .font(.system(.body, design: .monospaced))
+                                                            .padding(.vertical, 8)
+                                                            .padding(.horizontal, 12)
+                                                            .background(
+                                                                RoundedRectangle(cornerRadius: 8)
+                                                                    .fill(primaryColor.opacity(0.1))
+                                                            )
+                                                            .foregroundColor(primaryColor)
+                                                    }
+                                                }
+                                                
+                                                Spacer(minLength: 0)
+                                            }
+                                            .frame(maxWidth: .infinity)
                                         }
                                     }
+                                    .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.3)))
                                 }
                             }
+                            .animation(.easeInOut(duration: 0.3), value: isCalculating)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding()
@@ -417,6 +595,16 @@ struct ContentView: View {
                         )
                         .padding(.top, 4)
                         .transition(.move(edge: .top).combined(with: .opacity))
+                        // Add a unique id for each number to force transition when number changes
+                        .id("factors-\(number)")
+                        .onAppear {
+                            // When this view appears, start calculating factors in the background
+                            calculateFactors(for: number)
+                        }
+                        .onChange(of: number) { newNumber in
+                            // Recalculate factors when the number changes while view is expanded
+                            calculateFactors(for: newNumber)
+                        }
                     }
                 }
             }
