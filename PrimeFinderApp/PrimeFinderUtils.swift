@@ -9,7 +9,7 @@ import Foundation
 
 struct PrimeFinderUtils {
     // Constants
-    static let maxNumberInput: UInt64 = 999_999_999_999_999
+    static let maxNumberInput: UInt64 = 999_999_999_999_999_999
     
     // MARK: - Prime Checking Functions
     static func isPrime(_ number: UInt64) -> Bool {

@@ -33,7 +33,7 @@ struct ContentView: View {
     @State private var isButtonChange = false // Track if change is from a button
     
     // MARK: - Constants
-    let maxInputLength = 15
+    let maxInputLength = 18
     let maxNumberInput = PrimeFinderUtils.maxNumberInput
     
     // External URLs
@@ -527,7 +527,7 @@ struct ContentView: View {
                                         VStack {
                                             ProgressView()
                                                 .progressViewStyle(CircularProgressViewStyle())
-                                            Text("Calculating factors...")
+                                            Text("Calculating...")
                                                 .font(.caption)
                                                 .foregroundColor(.secondary)
                                                 .padding(.top, 8)
@@ -554,7 +554,7 @@ struct ContentView: View {
                                                 Text("\(index + 1).")
                                                     .font(.body)
                                                     .foregroundColor(.gray)
-                                                    .frame(width: indexWidth, alignment: .trailing)
+                                                    .frame(width: indexWidth, alignment: .leading)
                                                 
                                                 // For very large factors, use scrolling
                                                 ScrollView(.horizontal, showsIndicators: factor > 1_000_000) {
@@ -595,8 +595,6 @@ struct ContentView: View {
                         )
                         .padding(.top, 4)
                         .transition(.move(edge: .top).combined(with: .opacity))
-                        // Add a unique id for each number to force transition when number changes
-                        .id("factors-\(number)")
                         .onAppear {
                             // When this view appears, start calculating factors in the background
                             calculateFactors(for: number)
