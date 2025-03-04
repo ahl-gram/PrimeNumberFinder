@@ -24,20 +24,20 @@ struct ContentView: View {
     @State internal var isResultExpanded = false
     @State private var editMode = EditMode.inactive
     @State private var showingFactorAlert = false
-    @State private var isCalculating = false
-    @State private var calculationStartTime: Date?
-    @State private var currentFactors: [UInt64] = []
-    @State private var currentCalculationID: UUID = UUID()
+    @State internal var isCalculating = false
+    @State internal var calculationStartTime: Date?
+    @State internal var currentFactors: [UInt64] = []
+    @State internal var currentCalculationID: UUID = UUID()
     @FocusState internal var isInputFocused: Bool
-    @State private var isUserTyping = true
-    @State private var isButtonChange = false // Track if change is from a button
+    @State internal var isUserTyping = true
+    @State internal var isButtonChange = false // Track if change is from a button
     
     // MARK: - Constants
     let maxInputLength = 18
     let maxNumberInput = PrimeFinderUtils.maxNumberInput
     
     // Font size calculation for responsive input display
-    private func calculateFontSize(for inputLength: Int) -> CGFloat {
+    internal func calculateFontSize(for inputLength: Int) -> CGFloat {
         // Get the dynamic title text style size based on user preferences
         let titleSize = UIFont.preferredFont(forTextStyle: .title1).pointSize
         let minSize = UIFont.preferredFont(forTextStyle: .callout).pointSize
@@ -93,7 +93,7 @@ struct ContentView: View {
     }
     
     // MARK: - Helper Methods
-    private func calculateFactors(for number: UInt64) {
+    internal func calculateFactors(for number: UInt64) {
         // Generate a new calculation ID to invalidate any current calculation
         if isCalculating {
             currentCalculationID = UUID()
@@ -270,7 +270,7 @@ struct ContentView: View {
     }
     
     // Helper function to format large numbers with commas
-    private func formatLargeNumber(_ numberString: String) -> String {
+    internal func formatLargeNumber(_ numberString: String) -> String {
         var result = ""
         var remainingDigits = numberString
         
@@ -398,7 +398,7 @@ struct ContentView: View {
     }
     
     // Helper function to format display numbers properly
-    private func formatDisplayNumber(_ number: UInt64) -> String {
+    internal func formatDisplayNumber(_ number: UInt64) -> String {
         if number > 9_999_999_999_999_000 {
             return formatLargeNumber(String(number))
         } else {
