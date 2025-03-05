@@ -10,34 +10,52 @@ import XCTest
 final class PrimeFinderAppUITests: XCTestCase {
 
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-
-        // In UI tests it is usually best to stop immediately when a failure occurs.
+        // Always stop immediately when a failure occurs in UI tests
         continueAfterFailure = false
-
-        // In UI tests it’s important to set the initial state - such as interface orientation - required for your tests before they run. The setUp method is a good place to do this.
+        
+        // UI tests should set up any required initial state before running
+        // Examples:
+        // - Interface orientation
+        // - Permissions
+        // - Initial app data
     }
 
     override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+        // Clean up after each test if needed
+        // Examples:
+        // - Restore app state
+        // - Clear any test data
     }
 
+    // MARK: - Test Templates
+    
+    // This section previously contained example tests that didn't test actual functionality.
+    // When adding new UI tests, consider the following patterns:
+    
+    /*
     @MainActor
-    func testExample() throws {
-        // UI tests must launch the application that they test.
+    func testSpecificFeature() throws {
+        // 1. Set up test prerequisites
         let app = XCUIApplication()
         app.launch()
-
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
+        
+        // 2. Perform UI interactions
+        // app.buttons["Button Name"].tap()
+        // app.textFields["Field Name"].typeText("Test input")
+        
+        // 3. Verify results with assertions
+        // XCTAssert(app.staticTexts["Result Text"].exists)
     }
+    */
+    
+    // Add your actual UI tests below
+}
 
-    @MainActor
-    func testLaunchPerformance() throws {
-        if #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 7.0, *) {
-            // This measures how long it takes to launch your application.
-            measure(metrics: [XCTApplicationLaunchMetric()]) {
-                XCUIApplication().launch()
-            }
-        }
+// Helper extension to tap at coordinates
+extension XCUIApplication {
+    func tapCoordinate(at point: CGPoint) {
+        let normalized = coordinate(withNormalizedOffset: .zero)
+        let coordinate = normalized.withOffset(CGVector(dx: point.x, dy: point.y))
+        coordinate.tap()
     }
 }

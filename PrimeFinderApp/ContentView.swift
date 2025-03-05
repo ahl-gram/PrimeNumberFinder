@@ -718,8 +718,11 @@ struct ContentView: View {
                             calculateFactors(for: number)
                         }
                         .onChange(of: number) { newNumber in
-                            // Recalculate factors when the number changes while view is expanded
-                            calculateFactors(for: newNumber)
+                            // Only recalculate factors when the number changes due to button press
+                            // and not user typing
+                            if !isUserTyping {
+                                calculateFactors(for: newNumber)
+                            }
                         }
                     }
                 }
