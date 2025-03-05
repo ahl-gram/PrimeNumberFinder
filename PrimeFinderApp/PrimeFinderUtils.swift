@@ -2,7 +2,7 @@
 //  PrimeFinderUtils.swift
 //  PrimeFinderApp
 //
-//  Created by Alexander Lee on 2/8/25.
+//  Route 12B Software.
 //
 
 import Foundation

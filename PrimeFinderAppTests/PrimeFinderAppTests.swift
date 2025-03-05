@@ -2,7 +2,7 @@
 //  PrimeFinderAppTests.swift
 //  PrimeFinderAppTests
 //
-//  Created by Alexander Lee on 2/8/25.
+//  Route 12B Software.
 //
 
 import XCTest
