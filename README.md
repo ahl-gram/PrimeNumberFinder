@@ -1,6 +1,6 @@
 # Prime Number Finder
 
-A sleek iOS app that helps you identify prime numbers and find prime factorizations. Built with SwiftUI, Cursor, and help from Claude-3.5-Sonnet, Prime Number Finder combines mathematical utility with a modern, user-friendly interface.
+A sleek iOS app that helps you identify prime numbers and find prime factorizations. Built with SwiftUI, Cursor, and help from Claude and ChatGPT (vibe-coding), Prime Number Finder combines mathematical utility with a modern, user-friendly interface.
 
 ## Features
 
@@ -40,13 +40,14 @@ open PrimeFinderApp.xcodeproj
 2. Tap the "Check" button
 3. The app will tell you if the number is prime
 4. For composite numbers, it will show the prime factorization
-5. View your calculation history by tapping the clock icon
+5. Tap the chevron on composite numbers to see all factors.
+6. View your calculation history by tapping the clock icon
 
 ## Features in Detail
 
 ### Prime Number Checking
 - Efficiently determines if a number is prime
-- Handles numbers up to 9,999,999,999
+- Handles numbers up to 999,999,999,999,999,999
 - Special handling for edge cases like 1
 
 ### Prime Factorization
@@ -66,7 +67,7 @@ The app includes a comprehensive test suite that ensures reliability and correct
 ### Unit Tests
 - **Prime Number Validation**: Tests for correctly identifying prime and composite numbers
 - **Prime Factorization**: Verifies accurate factorization of various numbers
-- **Large Number Processing**: Tests performance with numbers up to 9,999,999,999
+- **Large Number Processing**: Tests performance with numbers up to 999,999,999,999,999,999
 
 The test suite is continuously maintained and expanded.
 
