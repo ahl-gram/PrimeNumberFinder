@@ -1,6 +1,6 @@
 # Prime Number Finder
 
-A sleek iOS app that helps you identify prime numbers and find prime factorizations. Built with SwiftUI, Cursor, and help from Claude and ChatGPT (vibe-coding), Prime Number Finder combines mathematical utility with a modern, user-friendly interface.
+A sleek iOS app that helps you identify prime numbers and find prime factorizations. Built with SwiftUI, Cursor, and help from Claude and ChatGPT, Prime Number Finder combines mathematical utility with a modern, user-friendly interface.
 
 ## Features
 
