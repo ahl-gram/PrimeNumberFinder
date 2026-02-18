@@ -126,6 +126,7 @@ struct PrimeFinderUtils {
     }
     
     static func findPreviousPrime(_ from: UInt64) -> UInt64? {
+        guard from > 2 else { return nil }
         var current = from - 1
         while current >= 2 {
             if isPrime(current) {
