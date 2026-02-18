@@ -85,7 +85,7 @@ struct HelpView: View {
             Section {
                 HStack {
                     Spacer()
-                    Text("© 2025 Alexander Lee - Route 12B Software")
+                    Text("© 2026 Alexander Lee - Route 12B Software")
                         .font(.caption)
                         .foregroundColor(.green)
                     Spacer()
