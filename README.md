@@ -6,7 +6,7 @@ A sleek iOS app that helps you identify prime numbers and find prime factorizati
 
 - 🔢 Prime number checking
 - ⚡️ Instant prime factorization
-- 📱 Clean, modern UI
+- 📱 Clean, modern UI with Liquid Glass design
 - 📖 History tracking of previous calculations
 - 🎯 Input validation and filtering
 - 💫 Smooth animations and transitions
@@ -15,15 +15,15 @@ A sleek iOS app that helps you identify prime numbers and find prime factorizati
 
 ## Requirements
 
-- iOS 15.0+
-- Xcode 14.0+
-- Swift 5.5+
+- iOS 26.0+
+- Xcode 26.0+
+- Swift 6.0+
 
 ## Installation
 
 1. Clone the repository
 ```bash
-git clone https://github.com/ahl-gram/PrimeFinderApp.git
+git clone https://github.com/ahl-gram/PrimeNumberFinder.git
 ```
 
 2. Open the project in Xcode
