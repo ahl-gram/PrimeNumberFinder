@@ -80,7 +80,7 @@ struct ContentView: View {
     let wikipediaURL = "https://en.wikipedia.org/wiki/Prime_number"
     let oeisURL = "https://oeis.org/A000040"
     let appStoreURL = "http://apps.apple.com/us/app/prime-finder-app/id6741829020"
-    let githubIssuesURL = "http://github.com/ahl-gram/PrimeFinder/issues"
+    let githubIssuesURL = "http://github.com/ahl-gram/PrimeNumberFinder/issues"
     
     // MARK: - Colors
     let primaryColor = Color.blue
