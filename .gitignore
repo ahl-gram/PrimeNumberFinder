@@ -61,3 +61,8 @@ fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
 .DS_Store
+
+# Claude Code
+CLAUDE.md
+SESSION-NOTES.md
+RESUME-HERE.md

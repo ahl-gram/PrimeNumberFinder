@@ -348,7 +348,7 @@ struct ContentView: View {
                         }
                     }
                 }
-                .onChange(of: inputNumber) { newValue in
+                .onChange(of: inputNumber) {
                     // Only set isUserTyping to true if this is not a programmatic change
                     if isButtonChange {
                         // Reset the flag for the next change
@@ -356,12 +356,12 @@ struct ContentView: View {
                     } else {
                         isUserTyping = true
                     }
-                    
+
                     // Filter to digits only
-                    let filtered = newValue.filter { "0123456789".contains($0) }
+                    let filtered = inputNumber.filter { "0123456789".contains($0) }
                     
                     // Provide haptic feedback if input was filtered
-                    if filtered != newValue {
+                    if filtered != inputNumber {
                         UIImpactFeedbackGenerator(style: .light).impactOccurred()
                     }
                     
@@ -407,151 +407,141 @@ struct ContentView: View {
     }
     
     var checkButton: some View {
-        HStack(spacing: 10) {
-            // Left Arrow Button
-            Button(action: {
-                // Set flags to indicate this is not direct user typing
-                isUserTyping = false
-                isButtonChange = true
-                
-                if let number = UInt64(inputNumber),
-                   let previousPrime = PrimeFinderUtils.findPreviousPrime(number) {
-                    inputNumber = String(previousPrime)
-                    UINotificationFeedbackGenerator().notificationOccurred(.success)
-                    validateAndProcessInput()
-                } else {
-                    UINotificationFeedbackGenerator().notificationOccurred(.error)
-                }
-            }) {
-                Image(systemName: "arrowtriangle.left.circle.fill")
-                    .imageScale(.large)
-                    .foregroundColor(.white)
-                    .frame(width: 44, height: 44)
-                    .background(primaryColor)
-                    .cornerRadius(12)
-                    .shadow(radius: 2)
-                    .opacity(inputNumber.isEmpty || (Int(inputNumber) ?? 0) <= 2 ? 0.5 : 1.0)
-            }
-            .disabled(inputNumber.isEmpty || (Int(inputNumber) ?? 0) <= 2)
-            .accessibilityLabel("Previous Prime")
+        GlassEffectContainer {
+            HStack(spacing: 10) {
+                // Left Arrow Button
+                Button(action: {
+                    // Set flags to indicate this is not direct user typing
+                    isUserTyping = false
+                    isButtonChange = true
 
-            // Minus Button
-            Button(action: {
-                // Set flags to indicate this is not direct user typing
-                isUserTyping = false
-                isButtonChange = true
-                
-                if let number = Int(inputNumber) {
-                    inputNumber = String(number - 1)
-                    validateAndProcessInput()
-                }
-            }) {
-                Image(systemName: "minus.circle.fill")
-                    .imageScale(.large)
-                    .foregroundColor(.white)
-                    .frame(width: 44, height: 44)
-                    .background(primaryColor)
-                    .cornerRadius(12)
-                    .shadow(radius: 2)
-                    .opacity(inputNumber.isEmpty || inputNumber <= "1" ? 0.5 : 1.0)
-            }
-            .disabled(inputNumber.isEmpty || inputNumber <= "1")
-            .accessibilityLabel("Decrement Number")
-
-            // Original Check Button
-            Button(action: {
-                validateAndProcessInput()
-            }) {
-                HStack {
-                    ZStack {
-                        if isCalculating {
-                            // Show spinner when calculation is in progress
-                            ProgressView()
-                                .progressViewStyle(CircularProgressViewStyle())
-                                .tint(.white)
-                                .transition(.opacity)
-                        } else {
-                            Image(systemName: "checkmark.circle.fill")
-                                .imageScale(.large)
-                                .transition(.opacity)
-                        }
+                    if let number = UInt64(inputNumber),
+                       let previousPrime = PrimeFinderUtils.findPreviousPrime(number) {
+                        inputNumber = String(previousPrime)
+                        UINotificationFeedbackGenerator().notificationOccurred(.success)
+                        validateAndProcessInput()
+                    } else {
+                        UINotificationFeedbackGenerator().notificationOccurred(.error)
                     }
-                    .frame(width: 20, height: 20)
-                    .animation(.easeInOut(duration: 0.3), value: isCalculating)
-                    
-                    ZStack {
-                        if isCalculating {
-                            Text("Calculating...")
-                                .font(.headline)
-                                .transition(.opacity)
-                        } else {
-                            Text("Check")
-                                .font(.headline)
-                                .transition(.opacity)
-                        }
+                }) {
+                    Image(systemName: "arrowtriangle.left.circle.fill")
+                        .imageScale(.large)
+                        .foregroundStyle(.white)
+                        .frame(width: 44, height: 44)
+                        .opacity(inputNumber.isEmpty || (Int(inputNumber) ?? 0) <= 2 ? 0.5 : 1.0)
+                }
+                .glassEffect(.regular.interactive().tint(.blue), in: RoundedRectangle(cornerRadius: 12))
+                .disabled(inputNumber.isEmpty || (Int(inputNumber) ?? 0) <= 2)
+                .accessibilityLabel("Previous Prime")
+
+                // Minus Button
+                Button(action: {
+                    // Set flags to indicate this is not direct user typing
+                    isUserTyping = false
+                    isButtonChange = true
+
+                    if let number = Int(inputNumber) {
+                        inputNumber = String(number - 1)
+                        validateAndProcessInput()
                     }
-                    .animation(.easeInOut(duration: 0.3), value: isCalculating)
+                }) {
+                    Image(systemName: "minus.circle.fill")
+                        .imageScale(.large)
+                        .foregroundStyle(.white)
+                        .frame(width: 44, height: 44)
+                        .opacity(inputNumber.isEmpty || inputNumber <= "1" ? 0.5 : 1.0)
                 }
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(primaryColor)
-                .cornerRadius(12)
-                .shadow(radius: 2)
-                .opacity(inputNumber.isEmpty ? 0.5 : 1.0)
-            }
-            .disabled(inputNumber.isEmpty)
-            .accessibilityLabel("Check Button")
+                .glassEffect(.regular.interactive().tint(.blue), in: RoundedRectangle(cornerRadius: 12))
+                .disabled(inputNumber.isEmpty || inputNumber <= "1")
+                .accessibilityLabel("Decrement Number")
 
-            // Plus Button
-            Button(action: {
-                // Set flags to indicate this is not direct user typing
-                isUserTyping = false
-                isButtonChange = true
-                
-                if let number = Int(inputNumber) {
-                    inputNumber = String(number + 1)
+                // Original Check Button
+                Button(action: {
                     validateAndProcessInput()
-                }
-            }) {
-                Image(systemName: "plus.circle.fill")
-                    .imageScale(.large)
-                    .foregroundColor(.white)
-                    .frame(width: 44, height: 44)
-                    .background(primaryColor)
-                    .cornerRadius(12)
-                    .shadow(radius: 2)
-                    .opacity(inputNumber.isEmpty || inputNumber >= String(maxNumberInput) ? 0.5 : 1.0)
-            }
-            .disabled(inputNumber.isEmpty || inputNumber >= String(maxNumberInput))
-            .accessibilityLabel("Increment Number")
+                }) {
+                    HStack {
+                        ZStack {
+                            if isCalculating {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle())
+                                    .transition(.opacity)
+                            } else {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .imageScale(.large)
+                                    .transition(.opacity)
+                            }
+                        }
+                        .frame(width: 20, height: 20)
+                        .animation(.easeInOut(duration: 0.3), value: isCalculating)
 
-            // Right Arrow Button
-            Button(action: {
-                // Set flags to indicate this is not direct user typing
-                isUserTyping = false
-                isButtonChange = true
-                
-                if let number = UInt64(inputNumber),
-                   let nextPrime = PrimeFinderUtils.findNextPrime(number) {
-                    inputNumber = String(nextPrime)
-                    UINotificationFeedbackGenerator().notificationOccurred(.success)
-                    validateAndProcessInput()
-                } else {
-                    UINotificationFeedbackGenerator().notificationOccurred(.error)
+                        ZStack {
+                            if isCalculating {
+                                Text("Calculating...")
+                                    .font(.headline)
+                                    .transition(.opacity)
+                            } else {
+                                Text("Check")
+                                    .font(.headline)
+                                    .transition(.opacity)
+                            }
+                        }
+                        .animation(.easeInOut(duration: 0.3), value: isCalculating)
+                    }
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .opacity(inputNumber.isEmpty ? 0.5 : 1.0)
                 }
-            }) {
-                Image(systemName: "arrowtriangle.right.circle.fill")
-                    .imageScale(.large)
-                    .foregroundColor(.white)
-                    .frame(width: 44, height: 44)
-                    .background(primaryColor)
-                    .cornerRadius(12)
-                    .shadow(radius: 2)
-                    .opacity(inputNumber.isEmpty || inputNumber >= String(maxNumberInput) ? 0.5 : 1.0)
+                .glassEffect(.regular.interactive().tint(.blue), in: RoundedRectangle(cornerRadius: 12))
+                .disabled(inputNumber.isEmpty)
+                .accessibilityLabel("Check Button")
+
+                // Plus Button
+                Button(action: {
+                    // Set flags to indicate this is not direct user typing
+                    isUserTyping = false
+                    isButtonChange = true
+
+                    if let number = Int(inputNumber) {
+                        inputNumber = String(number + 1)
+                        validateAndProcessInput()
+                    }
+                }) {
+                    Image(systemName: "plus.circle.fill")
+                        .imageScale(.large)
+                        .foregroundStyle(.white)
+                        .frame(width: 44, height: 44)
+                        .opacity(inputNumber.isEmpty || inputNumber >= String(maxNumberInput) ? 0.5 : 1.0)
+                }
+                .glassEffect(.regular.interactive().tint(.blue), in: RoundedRectangle(cornerRadius: 12))
+                .disabled(inputNumber.isEmpty || inputNumber >= String(maxNumberInput))
+                .accessibilityLabel("Increment Number")
+
+                // Right Arrow Button
+                Button(action: {
+                    // Set flags to indicate this is not direct user typing
+                    isUserTyping = false
+                    isButtonChange = true
+
+                    if let number = UInt64(inputNumber),
+                       let nextPrime = PrimeFinderUtils.findNextPrime(number) {
+                        inputNumber = String(nextPrime)
+                        UINotificationFeedbackGenerator().notificationOccurred(.success)
+                        validateAndProcessInput()
+                    } else {
+                        UINotificationFeedbackGenerator().notificationOccurred(.error)
+                    }
+                }) {
+                    Image(systemName: "arrowtriangle.right.circle.fill")
+                        .imageScale(.large)
+                        .foregroundStyle(.white)
+                        .frame(width: 44, height: 44)
+                        .opacity(inputNumber.isEmpty || inputNumber >= String(maxNumberInput) ? 0.5 : 1.0)
+                }
+                .glassEffect(.regular.interactive().tint(.blue), in: RoundedRectangle(cornerRadius: 12))
+                .disabled(inputNumber.isEmpty || inputNumber >= String(maxNumberInput))
+                .accessibilityLabel("Next Prime")
             }
-            .disabled(inputNumber.isEmpty || inputNumber >= String(maxNumberInput))
-            .accessibilityLabel("Next Prime")
         }
         .padding(.horizontal)
     }
@@ -586,33 +576,29 @@ struct ContentView: View {
                             HStack {
                                 Text(firstLine)
                                     .font(result.contains("Please enter") ? .body : .headline)
-                                    .foregroundColor(result.contains("is a prime")
-                                                   ? .green
-                                                   : result.contains("is not a prime") || result.contains("defined as not")
-                                                   ? primaryColor
-                                                   : .red)
+                                    .foregroundStyle(.white)
                                 Spacer()
                                 if result.contains("is not a prime") {
                                     Image(systemName: isResultExpanded ? "chevron.up.circle.fill" : "chevron.down.circle.fill")
-                                        .foregroundColor(result.contains("is a prime")
-                                                       ? .green
-                                                       : primaryColor)
+                                        .foregroundStyle(.white)
                                         .imageScale(.large)
                                 }
                             }
                         }
-                        
+
                         if components.count > 1 {
                             Text(components.dropFirst().joined(separator: "\n"))
                                 .font(.body)
-                                .foregroundColor(primaryColor)
+                                .foregroundStyle(.white)
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color(.systemGray6))
+                    .glassEffect(
+                        .regular.tint(result.contains("is a prime") ? .green
+                                      : result.contains("is not a prime") || result.contains("defined as not") ? .blue
+                                      : .red),
+                        in: RoundedRectangle(cornerRadius: 12)
                     )
                 }
                 .buttonStyle(PlainButtonStyle())
@@ -656,7 +642,7 @@ struct ContentView: View {
                                                 // Index column with consistent width
                                                 Text("\(index + 1).")
                                                     .font(.body)
-                                                    .foregroundColor(.gray)
+                                                    .foregroundColor(primaryColor)
                                                     .frame(width: indexWidth, alignment: .leading)
                                                 
                                                 // For very large factors, use scrolling
@@ -670,28 +656,22 @@ struct ContentView: View {
                                                         UIImpactFeedbackGenerator(style: .light).impactOccurred()
                                                     }) {
                                                         // Format the number as needed
-                                                        if factor > 9_999_999_999_999_000 {
-                                                            Text(formatLargeNumber(String(factor)))
-                                                                .font(.system(.body, design: .monospaced))
-                                                                .padding(.vertical, 8)
-                                                                .padding(.horizontal, 12)
-                                                                .background(
-                                                                    RoundedRectangle(cornerRadius: 8)
-                                                                        .fill(primaryColor.opacity(0.1))
-                                                                )
-                                                                .foregroundColor(primaryColor)
-                                                        } else {
-                                                            Text(NumberFormatter.localizedString(
-                                                                from: NSNumber(value: factor), number: .decimal))
-                                                                .font(.system(.body, design: .monospaced))
-                                                                .padding(.vertical, 8)
-                                                                .padding(.horizontal, 12)
-                                                                .background(
-                                                                    RoundedRectangle(cornerRadius: 8)
-                                                                        .fill(primaryColor.opacity(0.1))
-                                                                )
-                                                                .foregroundColor(primaryColor)
+                                                        Group {
+                                                            if factor > 9_999_999_999_999_000 {
+                                                                Text(formatLargeNumber(String(factor)))
+                                                            } else {
+                                                                Text(NumberFormatter.localizedString(
+                                                                    from: NSNumber(value: factor), number: .decimal))
+                                                            }
                                                         }
+                                                        .font(.system(.body, design: .monospaced))
+                                                        .foregroundStyle(.white)
+                                                        .padding(.vertical, 8)
+                                                        .padding(.horizontal, 12)
+                                                        .background(
+                                                            RoundedRectangle(cornerRadius: 8)
+                                                                .fill(primaryColor)
+                                                        )
                                                     }
                                                 }
                                                 
@@ -709,7 +689,7 @@ struct ContentView: View {
                         .padding()
                         .background(
                             RoundedRectangle(cornerRadius: 12)
-                                .fill(Color(.systemGray6))
+                                .fill(primaryColor.opacity(0.15))
                         )
                         .padding(.top, 4)
                         .transition(.move(edge: .top).combined(with: .opacity))
@@ -717,11 +697,11 @@ struct ContentView: View {
                             // When this view appears, start calculating factors in the background
                             calculateFactors(for: number)
                         }
-                        .onChange(of: number) { newNumber in
+                        .onChange(of: number) {
                             // Only recalculate factors when the number changes due to button press
                             // and not user typing
                             if !isUserTyping {
-                                calculateFactors(for: newNumber)
+                                calculateFactors(for: number)
                             }
                         }
                     }
