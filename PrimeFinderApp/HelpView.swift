@@ -76,7 +76,6 @@ struct HelpView: View {
                     Text("• Indigo results indicate prime numbers")
                     Text("• Blue results indicate composite numbers")
                     Text("• Tap any result to explore more details")
-                    Text("• Rotate your device to landscape mode for more horizontal space")
                 }
                 .font(.body)
                 .padding(.vertical, 4)
