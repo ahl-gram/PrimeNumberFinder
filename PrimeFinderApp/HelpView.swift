@@ -93,6 +93,7 @@ struct HelpView: View {
                 .padding(.vertical, 4)
             }
         }
+        .scrollEdgeEffectStyle(.soft, for: .all)
     }
 }
 
