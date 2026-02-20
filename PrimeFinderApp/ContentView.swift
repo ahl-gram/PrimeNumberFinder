@@ -140,7 +140,7 @@ struct ContentView: View {
         }
         else {
             if PrimeFinderUtils.isPrime(number) {
-                result = "✅ \(formattedNumber) is a prime number."
+                result = "\(formattedNumber) is a prime number."
             } else {
                 let factors = PrimeFinderUtils.primeFactors(number)
                 let formattedFactors = factors.map {
@@ -151,7 +151,7 @@ struct ContentView: View {
                         return NumberFormatter.localizedString(from: NSNumber(value: factor), number: .decimal)
                     }
                 }
-                result = "☑️ \(formattedNumber) is not a prime number.\nPrime factors: \(formattedFactors.joined(separator: " × "))"
+                result = "\(formattedNumber) is not a prime number.\nPrime factors: \(formattedFactors.joined(separator: " × "))"
             }
         }
         addToHistory(number: number, result: result)
@@ -204,7 +204,7 @@ struct ContentView: View {
                                 } else {
                                     formattedNumber = NumberFormatter.localizedString(from: NSNumber(value: number), number: .decimal)
                                 }
-                                result = "✅ \(formattedNumber) is a prime number."
+                                result = "\(formattedNumber) is a prime number."
                             } else {
                                 let primeFactors = PrimeFinderUtils.primeFactors(number)
                                 let formattedNumber: String
@@ -221,7 +221,7 @@ struct ContentView: View {
                                         return NumberFormatter.localizedString(from: NSNumber(value: factor), number: .decimal)
                                     }
                                 }
-                                result = "☑️ \(formattedNumber) is not a prime number.\nPrime factors: \(formattedFactors.joined(separator: " × "))"
+                                result = "\(formattedNumber) is not a prime number.\nPrime factors: \(formattedFactors.joined(separator: " × "))"
                             }
                         }
                         addToHistory(number: number, result: result)

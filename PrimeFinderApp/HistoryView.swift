@@ -27,7 +27,7 @@ struct HistoryView: View {
                         .font(.headline)
                     Text(item.result)
                         .font(.subheadline)
-                        .foregroundColor(item.result.contains("is a prime number") ? .green :
+                        .foregroundColor(item.result.contains("is a prime number") ? .indigo :
                                             item.result.contains("is not a prime number") || item.result.contains("defined as not") ? primaryColor : .red)
                     Text(item.timestamp, formatter: {
                         let formatter = DateFormatter()

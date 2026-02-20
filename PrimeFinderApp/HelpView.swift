@@ -73,7 +73,7 @@ struct HelpView: View {
                     Text("• Numbers are limited to \(maxInputLength) digits to prevent overflow")
                     Text("• Clear the input field using the 🅧 button")
                     Text("• Tap anywhere to dismiss the keyboard")
-                    Text("• Green results indicate prime numbers")
+                    Text("• Indigo results indicate prime numbers")
                     Text("• Blue results indicate composite numbers")
                     Text("• Tap any result to explore more details")
                     Text("• Rotate your device to landscape mode for more horizontal space")

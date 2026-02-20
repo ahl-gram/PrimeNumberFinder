@@ -19,6 +19,34 @@ struct ResultView: View {
     let calculateFactors: (UInt64) -> Void
     let formatLargeNumber: (String) -> String
 
+    private var resultIcon: some View {
+        Group {
+            if result.contains("is a prime") {
+                Image(systemName: "checkmark.seal.fill")
+                    .font(.title)
+                    .foregroundStyle(.white)
+                    .overlay(alignment: .topTrailing) {
+                        Image(systemName: "star.fill")
+                            .font(.system(size: 10))
+                            .foregroundStyle(.yellow)
+                            .offset(x: 4, y: -4)
+                    }
+            } else if result.contains("is not a prime") || result.contains("defined as not") {
+                Image(systemName: "xmark.seal.fill")
+                    .imageScale(.large)
+                    .foregroundStyle(.white)
+            } else if result.contains("Please enter") {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .imageScale(.large)
+                    .foregroundStyle(.white)
+            } else {
+                Image(systemName: "info.circle.fill")
+                    .imageScale(.large)
+                    .foregroundStyle(.white)
+            }
+        }
+    }
+
     var body: some View {
         VStack(spacing: 8) {
             if !result.isEmpty {
@@ -29,6 +57,7 @@ struct ResultView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         if let firstLine = components.first {
                             HStack {
+                                resultIcon
                                 Text(firstLine)
                                     .font(result.contains("Please enter") ? .body : .headline)
                                     .foregroundStyle(.white)
@@ -50,7 +79,7 @@ struct ResultView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding()
                     .glassEffect(
-                        .regular.tint(result.contains("is a prime") ? .green
+                        .regular.tint(result.contains("is a prime") ? .indigo
                                       : result.contains("is not a prime") || result.contains("defined as not") ? .blue
                                       : .red),
                         in: RoundedRectangle(cornerRadius: 12)
@@ -76,7 +105,7 @@ struct ResultView: View {
 
     private func allFactorsSection(for number: UInt64) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("🔢 All factors")
+            Label("All factors", systemImage: "number.square.fill")
                 .font(.headline)
                 .foregroundColor(primaryColor)
 

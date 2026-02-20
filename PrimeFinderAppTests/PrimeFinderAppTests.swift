@@ -104,11 +104,11 @@ class MockContentView {
         }
         else {
             if PrimeFinderUtils.isPrime(number) {
-                result = "✅ \(formattedNumber) is a prime number."
+                result = "\(formattedNumber) is a prime number."
             } else {
                 let factors = PrimeFinderUtils.primeFactors(number)
                 let formattedFactors = factors.map { NumberFormatter.localizedString(from: NSNumber(value: $0), number: .decimal) }
-                result = "☑️ \(formattedNumber) is not a prime number.\nPrime factors: \(formattedFactors.joined(separator: " × "))"
+                result = "\(formattedNumber) is not a prime number.\nPrime factors: \(formattedFactors.joined(separator: " × "))"
             }
         }
         
