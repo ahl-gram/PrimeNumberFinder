@@ -24,11 +24,9 @@ struct ButtonBarView: View {
                 Button(action: onPreviousPrime) {
                     Image(systemName: "arrowtriangle.left.circle.fill")
                         .imageScale(.large)
-                        .foregroundStyle(.white)
-                        .frame(width: 44, height: 44)
-                        .opacity(inputNumber.isEmpty || (Int(inputNumber) ?? 0) <= 2 ? 0.5 : 1.0)
                 }
-                .glassEffect(.regular.interactive().tint(.blue), in: RoundedRectangle(cornerRadius: 12))
+                .buttonStyle(.glass)
+                .tint(.blue)
                 .disabled(inputNumber.isEmpty || (Int(inputNumber) ?? 0) <= 2)
                 .accessibilityLabel("Previous Prime")
 
@@ -36,11 +34,9 @@ struct ButtonBarView: View {
                 Button(action: onDecrement) {
                     Image(systemName: "minus.circle.fill")
                         .imageScale(.large)
-                        .foregroundStyle(.white)
-                        .frame(width: 44, height: 44)
-                        .opacity(inputNumber.isEmpty || inputNumber <= "1" ? 0.5 : 1.0)
                 }
-                .glassEffect(.regular.interactive().tint(.blue), in: RoundedRectangle(cornerRadius: 12))
+                .buttonStyle(.glass)
+                .tint(.blue)
                 .disabled(inputNumber.isEmpty || inputNumber <= "1")
                 .accessibilityLabel("Decrement Number")
 
@@ -58,7 +54,6 @@ struct ButtonBarView: View {
                                     .transition(.opacity)
                             }
                         }
-                        .frame(width: 20, height: 20)
                         .animation(.easeInOut(duration: 0.3), value: isCalculating)
 
                         ZStack {
@@ -74,12 +69,11 @@ struct ButtonBarView: View {
                         }
                         .animation(.easeInOut(duration: 0.3), value: isCalculating)
                     }
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .opacity(inputNumber.isEmpty ? 0.5 : 1.0)
+                    .fixedSize()
                 }
-                .glassEffect(.regular.interactive().tint(.blue), in: RoundedRectangle(cornerRadius: 12))
+                .buttonStyle(.glassProminent)
+                .controlSize(.large)
+                .tint(.blue)
                 .disabled(inputNumber.isEmpty)
                 .accessibilityLabel("Check Button")
 
@@ -87,11 +81,9 @@ struct ButtonBarView: View {
                 Button(action: onIncrement) {
                     Image(systemName: "plus.circle.fill")
                         .imageScale(.large)
-                        .foregroundStyle(.white)
-                        .frame(width: 44, height: 44)
-                        .opacity(inputNumber.isEmpty || inputNumber >= String(maxNumberInput) ? 0.5 : 1.0)
                 }
-                .glassEffect(.regular.interactive().tint(.blue), in: RoundedRectangle(cornerRadius: 12))
+                .buttonStyle(.glass)
+                .tint(.blue)
                 .disabled(inputNumber.isEmpty || inputNumber >= String(maxNumberInput))
                 .accessibilityLabel("Increment Number")
 
@@ -99,11 +91,9 @@ struct ButtonBarView: View {
                 Button(action: onNextPrime) {
                     Image(systemName: "arrowtriangle.right.circle.fill")
                         .imageScale(.large)
-                        .foregroundStyle(.white)
-                        .frame(width: 44, height: 44)
-                        .opacity(inputNumber.isEmpty || inputNumber >= String(maxNumberInput) ? 0.5 : 1.0)
                 }
-                .glassEffect(.regular.interactive().tint(.blue), in: RoundedRectangle(cornerRadius: 12))
+                .buttonStyle(.glass)
+                .tint(.blue)
                 .disabled(inputNumber.isEmpty || inputNumber >= String(maxNumberInput))
                 .accessibilityLabel("Next Prime")
             }

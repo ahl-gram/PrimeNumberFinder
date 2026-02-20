@@ -104,18 +104,15 @@ struct LinkRow: View {
 
     var body: some View {
         if let url = URL(string: urlString) {
-            VStack {
+            Link(destination: url) {
                 HStack {
                     Text(title)
                         .font(.body)
+                        .foregroundColor(.primary)
                     Spacer()
-                    Button {
-                        UIApplication.shared.open(url)
-                    } label: {
-                        Image(systemName: "arrow.up.right.square")
-                            .imageScale(.large)
-                            .foregroundColor(.blue)
-                    }
+                    Image(systemName: "arrow.up.right.square")
+                        .imageScale(.large)
+                        .foregroundColor(.blue)
                 }
                 .padding(.vertical, 2)
             }

@@ -330,7 +330,7 @@ struct ContentView: View {
 
     // MARK: - Body
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 backgroundColor.ignoresSafeArea()
 
@@ -428,71 +428,80 @@ struct ContentView: View {
                         }
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .scrollEdgeEffectStyle(.soft, for: .all)
                     .cornerRadius(12)
                     .padding(.horizontal)
                 }
                 .padding(.top)
+                .scenePadding(.horizontal)
             }
-            .navigationBarTitle("Prime Number Finder", displayMode: .large)
-            .navigationBarItems(
-                leading: Button(action: { showingHelp = true }) {
-                    Image(systemName: "info.circle")
-                        .imageScale(.large)
-                        .foregroundColor(primaryColor)
-                },
-                trailing: Button(action: { showingHistory = true }) {
-                    Image(systemName: "clock.arrow.circlepath")
-                        .imageScale(.large)
-                        .foregroundColor(primaryColor)
+            .navigationTitle("Prime Number Finder")
+            .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button(action: { showingHelp = true }) {
+                        Image(systemName: "info.circle")
+                            .imageScale(.large)
+                            .foregroundColor(primaryColor)
+                    }
                 }
-            )
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(action: { showingHistory = true }) {
+                        Image(systemName: "clock.arrow.circlepath")
+                            .imageScale(.large)
+                            .foregroundColor(primaryColor)
+                    }
+                }
+            }
             .sheet(isPresented: $showingHistory) {
-                NavigationView {
+                NavigationStack {
                     HistoryView(
                         history: $history,
                         showingResetAlert: $showingResetAlert,
                         primaryColor: primaryColor
                     )
                     .navigationTitle("History")
-                    .navigationBarItems(
-                        leading: Group {
-                            HStack(spacing: 16) {
-                                if !history.isEmpty {
-                                    Button(action: {
-                                        showingResetAlert = true
-                                    }) {
-                                        Image(systemName: "trash")
-                                            .foregroundColor(.red)
-                                    }
-                                }
+                    .toolbar {
+                        ToolbarItemGroup(placement: .topBarLeading) {
+                            if !history.isEmpty {
                                 Button(action: {
-                                    withAnimation {
-                                        editMode = editMode.isEditing ? .inactive : .active
-                                    }
+                                    showingResetAlert = true
                                 }) {
-                                    Image(systemName: editMode.isEditing ? "checkmark" : "square.and.pencil")
-                                        .foregroundColor(.blue)
+                                    Image(systemName: "trash")
+                                        .foregroundColor(.red)
                                 }
                             }
-                        },
-                        trailing: Group {
+                            Button(action: {
+                                withAnimation {
+                                    editMode = editMode.isEditing ? .inactive : .active
+                                }
+                            }) {
+                                Image(systemName: editMode.isEditing ? "checkmark" : "square.and.pencil")
+                                    .foregroundColor(.blue)
+                            }
+                        }
+                        ToolbarItem(placement: .topBarTrailing) {
                             if editMode == .inactive {
                                 Button("Done") {
                                     showingHistory = false
                                 }
                             }
                         }
-                    )
+                    }
                     .environment(\.editMode, $editMode)
                 }
             }
             .sheet(isPresented: $showingHelp) {
-                NavigationView {
+                NavigationStack {
                     HelpView(maxInputLength: maxInputLength)
                         .navigationTitle("About")
-                        .navigationBarItems(trailing: Button("Done") {
-                            showingHelp = false
-                        })
+                        .toolbar {
+                            ToolbarItem(placement: .topBarTrailing) {
+                                Button("Done") {
+                                    showingHelp = false
+                                }
+                            }
+                        }
                 }
             }
             .contentShape(Rectangle())
@@ -502,7 +511,6 @@ struct ContentView: View {
                 }
             }
         }
-        .navigationViewStyle(.stack)
     }
 }
 

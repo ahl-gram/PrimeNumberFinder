@@ -43,6 +43,7 @@ struct HistoryView: View {
                 history.remove(atOffsets: indexSet)
             }
         }
+        .scrollEdgeEffectStyle(.soft, for: .all)
         .alert("Clear History", isPresented: $showingResetAlert) {
             Button("Cancel", role: .cancel) { }
             Button("Clear", role: .destructive) {
